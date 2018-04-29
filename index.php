@@ -11,37 +11,37 @@ $lotList = [
         'name' => '2014 Rossignol District Snowboard',
         'categories' => 'Доски и лыжи',
         'price' => 10999,
-        'url_img' => 'img/lot-1.jpg'
+        'imgUrl' => 'img/lot-1.jpg'
     ],
     [
         'name' => 'DC Ply Mens 2016/2017 Snowboard',
         'categories' => 'Доски и лыжи',
         'price' => 159999,
-        'url_img' => 'img/lot-2.jpg'
+        'imgUrl' => 'img/lot-2.jpg'
     ],
     [
         'name' => 'Крепления Union Contact Pro 2015 года размер L/XL',
         'categories' => 'Крепления',
         'price' => 8000,
-        'url_img' => 'img/lot-3.jpg'
+        'imgUrl' => 'img/lot-3.jpg'
     ],
     [
         'name' => 'Ботинки для сноуборда DC Mutiny Charocal',
         'categories' => 'Ботинки',
         'price' => 10999,
-        'url_img' => 'img/lot-4.jpg'
+        'imgUrl' => 'img/lot-4.jpg'
     ],
     [
         'name' => 'Куртка для сноуборда DC Mutiny Charocal',
         'categories' => 'Одежда',
         'price' => 7500,
-        'url_img' => 'img/lot-5.jpg'
+        'imgUrl' => 'img/lot-5.jpg'
     ],
     [
         'name' => 'Маска Oakley Canopy',
         'categories' => 'Разное',
         'price' => 5400,
-        'url_img' => 'img/lot-6.jpg'
+        'imgUrl' => 'img/lot-6.jpg'
     ],
 ];
 ?>
@@ -122,7 +122,7 @@ i                <div class="user-menu__image">
             <?php foreach ($lotList as $lot): ?>
                 <li class="lots__item lot">
                     <div class="lot__image">
-                        <img src="<?= $lot['url_img'] ?>" width="350" height="260" alt="<?= $lot['name'] ?>">
+                        <img src="<?= $lot['imgUrl'] ?>" width="350" height="260" alt="<?= $lot['name'] ?>">
                     </div>
                     <div class="lot__info">
                         <span class="lot__category"><?= $lot['categories'] ?></span>
