@@ -45,11 +45,9 @@ $lotList = [
     ],
 ];
 
-function priceFormat($num) {
-    $num = ceil($num);
-    ($num < 1000) ?: $num = number_format(ceil($num), 0, '', ' ');
-
-    return $num . ' ₽';
+function priceFormat( $num )
+{
+    return number_format(ceil($num), 0, '', ' ') . ' ₽';
 }
 ?>
 <!DOCTYPE html>
@@ -75,7 +73,7 @@ function priceFormat($num) {
         <a class="main-header__add-lot button" href="add-lot.html">Добавить лот</a>
 
         <nav class="user-menu">
-            <?php if (true === $is_auth): ?>
+            <?php if ( true === $is_auth ): ?>
                 <div class="user-menu__image">
                     <img src="<?= $user_avatar ?>" width="40" height="40" alt="Пользователь">
                 </div>
@@ -126,7 +124,7 @@ function priceFormat($num) {
             <h2>Открытые лоты</h2>
         </div>
         <ul class="lots__list">
-            <?php foreach ($lotList as $lot): ?>
+            <?php foreach ( $lotList as $lot ): ?>
                 <li class="lots__item lot">
                     <div class="lot__image">
                         <img src="<?= $lot['imgUrl'] ?>" width="350" height="260" alt="<?= $lot['name'] ?>">
@@ -153,7 +151,7 @@ function priceFormat($num) {
 <footer class="main-footer">
     <nav class="nav">
         <ul class="nav__list container">
-            <?php foreach ($categoryList as $category): ?>
+            <?php foreach ( $categoryList as $category ): ?>
                 <li class="nav__item">
                     <a href="all-lots.html"><?= $category ?></a>
                 </li>
