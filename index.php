@@ -44,6 +44,13 @@ $lotList = [
         'imgUrl' => 'img/lot-6.jpg'
     ],
 ];
+
+function priceFormat($num) {
+    $num = ceil($num);
+    ($num < 1000) ?: $num = number_format(ceil($num), 0, '', ' ');
+
+    return $num . ' ₽';
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -68,8 +75,8 @@ $lotList = [
         <a class="main-header__add-lot button" href="add-lot.html">Добавить лот</a>
 
         <nav class="user-menu">
-            <?php if ( true === $is_auth ): ?>
-i                <div class="user-menu__image">
+            <?php if (true === $is_auth): ?>
+                <div class="user-menu__image">
                     <img src="<?= $user_avatar ?>" width="40" height="40" alt="Пользователь">
                 </div>
                 <div class="user-menu__logged">
