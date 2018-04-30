@@ -44,6 +44,11 @@ $lotList = [
         'imgUrl' => 'img/lot-6.jpg'
     ],
 ];
+
+function priceFormat( $num )
+{
+    return number_format(ceil($num), 0, '', ' ') . ' ₽';
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -69,7 +74,7 @@ $lotList = [
 
         <nav class="user-menu">
             <?php if ( true === $is_auth ): ?>
-i                <div class="user-menu__image">
+                <div class="user-menu__image">
                     <img src="<?= $user_avatar ?>" width="40" height="40" alt="Пользователь">
                 </div>
                 <div class="user-menu__logged">
@@ -119,7 +124,7 @@ i                <div class="user-menu__image">
             <h2>Открытые лоты</h2>
         </div>
         <ul class="lots__list">
-            <?php foreach ($lotList as $lot): ?>
+            <?php foreach ( $lotList as $lot ): ?>
                 <li class="lots__item lot">
                     <div class="lot__image">
                         <img src="<?= $lot['imgUrl'] ?>" width="350" height="260" alt="<?= $lot['name'] ?>">
@@ -130,7 +135,7 @@ i                <div class="user-menu__image">
                         <div class="lot__state">
                             <div class="lot__rate">
                                 <span class="lot__amount">Стартовая цена</span>
-                                <span class="lot__cost"><?= $lot['price'] ?><b class="rub">р</b></span>
+                                <span class="lot__cost"><?= priceFormat($lot['price']) ?><b class="rub">р</b></span>
                             </div>
                             <div class="lot__timer timer">
 
@@ -146,7 +151,7 @@ i                <div class="user-menu__image">
 <footer class="main-footer">
     <nav class="nav">
         <ul class="nav__list container">
-            <?php foreach ($categoryList as $category): ?>
+            <?php foreach ( $categoryList as $category ): ?>
                 <li class="nav__item">
                     <a href="all-lots.html"><?= $category ?></a>
                 </li>
