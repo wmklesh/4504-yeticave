@@ -10,7 +10,12 @@ foreach ($lotList as $lot) {
     $lotListContent .= includeTemplate('lot', $lot);
 }
 $pageContent = includeTemplate('index', ['lotListContent' => $lotListContent]);
-$catListContent = includeTemplate('nav', ['categoryList' => $categoryList]);
+
+$catListContent = '';
+foreach ($categoryList as $category) {
+    $catListContent .= includeTemplate('nav', ['name' => $category]);
+}
+
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,
     'lotListContent' => $lotListContent,
