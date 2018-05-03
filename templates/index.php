@@ -27,6 +27,6 @@
         <h2>Открытые лоты</h2>
     </div>
     <ul class="lots__list">
-        <?= $content ?>
+        <?= $_content ?>
     </ul>
 </section>
