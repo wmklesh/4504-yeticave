@@ -7,7 +7,7 @@ function formatPrice($num) {
 function includeTemplate($tpl, $data) {
     if (is_readable(__DIR__ . '/templates/' . $tpl . '.php')) {
 
-        extract($data, EXTR_PREFIX_ALL, '_');
+        extract($data, EXTR_PREFIX_ALL, '');
         array_walk($data, function (&$value) {
             $value = htmlspecialchars($value);
         });
