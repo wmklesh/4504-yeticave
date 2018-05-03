@@ -43,7 +43,7 @@
 </header>
 
 <main class="container">
-    <?= $_content ?>
+    <?= $content ?>
 </main>
 
 <footer class="main-footer">
