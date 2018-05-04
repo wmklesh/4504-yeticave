@@ -1,7 +1,7 @@
 <?php
 
 function formatPrice($num) {
-    return number_format(ceil($num), 0, '', ' ') . ' ₽';
+    return sprintf('%s ₽', number_format(ceil($num), 0, '', ' '));
 }
 
 function includeTemplate($tpl, $data) {
@@ -20,6 +20,7 @@ function includeTemplate($tpl, $data) {
     return '';
 }
 
-function endTimeLot ($time) {
-    return sprintf('%02d:%02d', (($time - time()) / 3600) % 24, (($time - time()) / 60) % 60);
+function formatLotTimer ($endTime) {
+    $time = $endTime - time();
+    return sprintf('%02d:%02d', ($time / 3600) % 24, ($time / 60) % 60);
 }

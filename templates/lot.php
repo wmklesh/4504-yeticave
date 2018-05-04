@@ -11,7 +11,7 @@
                 <span class="lot__cost"><?= formatPrice($price) ?><b class="rub">р</b></span>
             </div>
             <div class="lot__timer timer">
-                <?= endTimeLot(strtotime('tomorrow'))?>
+                <?= formatLotTimer(strtotime('tomorrow'))?>
             </div>
         </div>
     </div>
