@@ -19,3 +19,7 @@ function includeTemplate($tpl, $data) {
     }
     return '';
 }
+
+function endTimeLot ($time) {
+    return sprintf('%02d:%02d', (($time - time()) / 3600) % 24, (($time - time()) / 60) % 60);
+}
