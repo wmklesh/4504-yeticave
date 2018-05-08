@@ -38,11 +38,13 @@ VALUES
 SELECT * FROM category;
 
 /* получить самые новые, открытые лоты. Каждый лот должен включать название, стартовую цену, ссылку на изображение, цену, количество ставок, название категории */
-SELECT l.name, l.price, img, c.name category_name, SUM(b.lot_id) sum_bet FROM lot l
+SELECT l.name, l.price, img, c.name category_name, IFNULL(b.count_bet, 0) count_bet
+FROM lot l
   JOIN category c ON c.id = l.category_id
-  JOIN bet b ON b.lot_id = l.id
+  LEFT JOIN
+    (SELECT b.lot_id, COUNT(b.id) count_bet FROM bet b GROUP BY b.lot_id) b
+  ON b.lot_id = l.id
 WHERE l.end_time > '2018-04-08 16:00:00'
-GROUP BY b.lot_id
 ORDER BY l.add_time DESC;
 
 /* показать лот по его id. Получите также название категории, к которой принадлежит лот */
