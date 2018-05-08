@@ -20,7 +20,7 @@ CREATE TABLE lot (
   price_step DECIMAL (10,4) UNSIGNED NOT NULL,
   add_time DATETIME NOT NULL,
   end_time DATETIME NOT NULL,
-  INDEX (add_user_id, category_id, name)
+  INDEX (add_user_id, category_id, name, description)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
 CREATE TABLE bet (
