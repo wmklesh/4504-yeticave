@@ -21,6 +21,7 @@ function includeTemplate($tpl, $data) {
 }
 
 function formatLotTimer ($endTime) {
+    $endTime = is_int($endTime)?: strtotime($endTime);
     $time = $endTime - time();
     return sprintf('%02d:%02d', ($time / 3600) % 24, ($time / 60) % 60);
 }
