@@ -26,41 +26,47 @@ function formatLotTimer($endTime) {
     return sprintf('%02d:%02d', ($time / 3600) % 24, ($time / 60) % 60);
 }
 
-function processQuery($connection, string $sql, array $param = []) {
-    if (empty($param)) {
-        $query = mysqli_query($connection, $sql);
-    }
+function processQuery($connection, array $param) {
+    addLimit($param);
 
-    return mysqli_fetch_all($query, MYSQLI_ASSOC);
+    $stmt = db_get_prepare_stmt($connection, $param['sql'], $param['date']);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+
+    return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
-function addLimit(int $limit) {
-    return ' LIMIT ' . $limit;
+function addLimit(array &$param) {
+    if ( (int) $param['limit']) {
+        $param['sql'] .= ' LIMIT ?';
+        $param['date'][] = $param['limit'];
+    }
+
+    return;
 }
 
 function getLotList($connection, int $limit = 0) {
-    $sql = 'SELECT l.name, l.price, img, end_time, c.name category_name, IFNULL(b.count_bet, 0) count_bet
+    $sql = 'SELECT l.*, c.name category_name
             FROM lot l
               JOIN category c ON c.id = l.category_id
-              LEFT JOIN
-                (SELECT b.lot_id, COUNT(b.id) count_bet FROM bet b GROUP BY b.lot_id) b
-              ON b.lot_id = l.id
             WHERE l.end_time > NOW()
             ORDER BY l.add_time DESC';
 
-    if ($limit) {
-        $sql .= addLimit($limit);
-    }
+    $param = [
+        'sql' => $sql,
+        'limit' => $limit
+    ];
 
-    return processQuery($connection, $sql);
+    return processQuery($connection, $param);
 }
 
 function getCatList($connection, int $limit = 0) {
     $sql = 'SELECT * FROM category';
 
-    if ($limit) {
-        $sql .= addLimit($limit);
-    }
+    $param = [
+        'sql' => $sql,
+        'limit' => $limit
+    ];
 
-    return processQuery($connection, $sql);
+    return processQuery($connection, $param);
 }
