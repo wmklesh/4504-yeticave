@@ -74,7 +74,7 @@ function addLimit(array &$param)
 
 function getLotList(int $limit = null, $connection = null)
 {
-    $sql = 'SELECT l.*, c.name category_name
+    $sql = 'SELECT l.*, c.name categoryName
             FROM lot l
               JOIN category c ON c.id = l.category_id
             WHERE l.end_time > NOW()
@@ -82,6 +82,7 @@ function getLotList(int $limit = null, $connection = null)
 
     $param = [
         'sql' => $sql,
+        'data' => [],
         'limit' => $limit
     ];
 
@@ -93,6 +94,7 @@ function getCatList(int $limit = null, $connection = null) {
 
     $param = [
         'sql' => $sql,
+        'data' => [],
         'limit' => $limit
     ];
 
