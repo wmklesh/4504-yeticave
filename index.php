@@ -1,10 +1,6 @@
 <?php
 
-date_default_timezone_set(‘Europe/Moscow’);
-ini_set('error_reporting', E_ALL & ~E_NOTICE);
-
-require __DIR__ . '/functions.php';
-require __DIR__ . '/mysql_helper.php';
+require __DIR__ . '/core/bootstrap.php';
 require __DIR__ . '/data.php';
 
 $lotList = getLotList(9);
