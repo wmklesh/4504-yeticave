@@ -7,15 +7,7 @@ require __DIR__ . '/functions.php';
 require __DIR__ . '/mysql_helper.php';
 require __DIR__ . '/data.php';
 
-$connection = mysqli_connect('localhost', 'root', 'root', 'yeticave');
-mysqli_set_charset($connection, 'utf8');
-
-if (! $connection) {
-    print('Ошибка: Невозможно подключиться к MySQL  ' . mysqli_connect_error());
-    die();
-}
-
-$lotList = getLotList($connection, 9);
+$lotList = getLotList(9);
 $lotListContent = '';
 foreach ($lotList as $lot) {
     $lotListContent .= includeTemplate('lot', $lot);
@@ -23,7 +15,7 @@ foreach ($lotList as $lot) {
 
 $pageContent = includeTemplate('index', ['lotListContent' => $lotListContent]);
 
-$categoryList = getCatList($connection);
+$categoryList = getCatList();
 $catListContent = '';
 foreach ($categoryList as $category) {
     $catListContent .= includeTemplate('nav', ['name' => $category['name']]);

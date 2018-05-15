@@ -1,5 +1,21 @@
 <?php
 
+function getConnection() {
+    static $connection;
+
+    if ($connection === null) {
+        $connection = mysqli_connect('localhost', 'root', 'root', 'yeticave');
+        mysqli_set_charset($connection, 'utf8');
+
+        if (! $connection) {
+            print('Ошибка: Невозможно подключиться к MySQL  ' . mysqli_connect_error());
+            die();
+        }
+    }
+
+    return $connection;
+}
+
 function formatPrice($num) {
     return sprintf('%s ₽', number_format(ceil($num), 0, '', ' '));
 }
@@ -17,6 +33,7 @@ function includeTemplate($tpl, $data) {
         require __DIR__ . '/templates/' . $tpl . '.php';
         return ob_get_clean();
     }
+
     return '';
 }
 
@@ -26,7 +43,11 @@ function formatLotTimer($endTime) {
     return sprintf('%02d:%02d', ($time / 3600) % 24, ($time / 60) % 60);
 }
 
-function processQuery($connection, array $param) {
+function processQuery(array $param, $connection = null) {
+    if ($connection === null) {
+        $connection = getConnection();
+    }
+
     addLimit($param);
 
     $stmt = db_get_prepare_stmt($connection, $param['sql'], $param['date']);
@@ -39,13 +60,13 @@ function processQuery($connection, array $param) {
 function addLimit(array &$param) {
     if ( (int) $param['limit']) {
         $param['sql'] .= ' LIMIT ?';
-        $param['date'][] = $param['limit'];
+        $param['date'][] = (int) $param['limit'];
     }
 
     return;
 }
 
-function getLotList($connection, int $limit = 0) {
+function getLotList(int $limit = 0, $connection = null) {
     $sql = 'SELECT l.*, c.name category_name
             FROM lot l
               JOIN category c ON c.id = l.category_id
@@ -57,10 +78,10 @@ function getLotList($connection, int $limit = 0) {
         'limit' => $limit
     ];
 
-    return processQuery($connection, $param);
+    return processQuery($param, $connection);
 }
 
-function getCatList($connection, int $limit = 0) {
+function getCatList(int $limit = 0, $connection = null) {
     $sql = 'SELECT * FROM category';
 
     $param = [
@@ -68,5 +89,5 @@ function getCatList($connection, int $limit = 0) {
         'limit' => $limit
     ];
 
-    return processQuery($connection, $param);
+    return processQuery($param, $connection);
 }
