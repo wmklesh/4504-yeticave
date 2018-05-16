@@ -5,7 +5,9 @@ function getConnection()
     static $connection;
 
     if ($connection === null) {
-        $connection = mysqli_connect('localhost', 'root', 'root', 'yeticave');
+        $config = getConfig();
+
+        $connection = mysqli_connect($config['dbHost'], $config['dbUser'], $config['dbPass'], $config['dbName']);
         mysqli_set_charset($connection, 'utf8');
 
         if (! $connection) {
@@ -15,6 +17,17 @@ function getConnection()
     }
 
     return $connection;
+}
+
+function getConfig()
+{
+    static $config = null;
+
+    if ($config === null) {
+        $config = require __DIR__ . '/../config.php';
+    }
+
+    return $config;
 }
 
 function formatPrice($num)
@@ -47,26 +60,26 @@ function formatLotTimer($endTime)
     return sprintf('%02d:%02d', ($time / 3600) % 24, ($time / 60) % 60);
 }
 
-function processQuery(array $param, $connection = null)
+function processQuery(array $parameterList, $connection = null)
 {
     if ($connection === null) {
         $connection = getConnection();
     }
 
-    addLimit($param);
+    addLimit($parameterList);
 
-    $stmt = db_get_prepare_stmt($connection, $param['sql'], $param['data']);
+    $stmt = db_get_prepare_stmt($connection, $parameterList['sql'], $parameterList['data']);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
 
     return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
-function addLimit(array &$param)
+function addLimit(array &$parameterList)
 {
-    if ( (int) $param['limit']) {
-        $param['sql'] .= ' LIMIT ?';
-        $param['data'][] = (int) $param['limit'];
+    if ( (int) $parameterList['limit']) {
+        $parameterList['sql'] .= ' LIMIT ?';
+        $parameterList['data'][] = (int) $parameterList['limit'];
     }
 
     return;
@@ -80,23 +93,23 @@ function getLotList(int $limit = null, $connection = null)
             WHERE l.end_time > NOW()
             ORDER BY l.add_time DESC';
 
-    $param = [
+    $parameterList = [
         'sql' => $sql,
         'data' => [],
         'limit' => $limit
     ];
 
-    return processQuery($param, $connection);
+    return processQuery($parameterList, $connection);
 }
 
 function getCatList(int $limit = null, $connection = null) {
     $sql = 'SELECT * FROM category';
 
-    $param = [
+    $parameterList = [
         'sql' => $sql,
         'data' => [],
         'limit' => $limit
     ];
 
-    return processQuery($param, $connection);
+    return processQuery($parameterList, $connection);
 }

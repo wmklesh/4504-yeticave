@@ -1,6 +1,6 @@
 <?php
 
-$config = [
+return [
     'dbHost' => 'localhost',
     'dbUser' => 'root',
     'dbPass' => 'root',
