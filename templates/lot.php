@@ -1,18 +1,63 @@
-<li class="lots__item lot">
-    <div class="lot__image">
-        <img src="<?= $img ?>" width="350" height="260" alt="<?= $name ?>">
-    </div>
-    <div class="lot__info">
-        <span class="lot__category"><?= $categoryName ?></span>
-        <h3 class="lot__title"><a class="text-link" href="lot.html"><?= $name ?></a></h3>
-        <div class="lot__state">
-            <div class="lot__rate">
-                <span class="lot__amount">Стартовая цена</span>
-                <span class="lot__cost"><?= formatPrice($price) ?><b class="rub">р</b></span>
+<nav class="nav">
+    <ul class="nav__list container">
+        <li class="nav__item">
+            <a href="all-lots.html">Доски и лыжи</a>
+        </li>
+        <li class="nav__item">
+            <a href="all-lots.html">Крепления</a>
+        </li>
+        <li class="nav__item">
+            <a href="all-lots.html">Ботинки</a>
+        </li>
+        <li class="nav__item">
+            <a href="all-lots.html">Одежда</a>
+        </li>
+        <li class="nav__item">
+            <a href="all-lots.html">Инструменты</a>
+        </li>
+        <li class="nav__item">
+            <a href="all-lots.html">Разное</a>
+        </li>
+    </ul>
+</nav>
+<section class="lot-item container">
+    <h2><?= $name ?></h2>
+    <div class="lot-item__content">
+        <div class="lot-item__left">
+            <div class="lot-item__image">
+                <img src="<?= $img ?>" width="730" height="548" alt="<?= $name ?>">
             </div>
-            <div class="lot__timer timer">
-                <?= formatLotTimer($end_time)?>
+            <p class="lot-item__category">Категория: <span><?= $categoryName ?></span></p>
+            <p class="lot-item__description"><?= $description ?></p>
+        </div>
+        <div class="lot-item__right">
+            <div class="lot-item__state">
+                <div class="lot-item__timer timer">
+                    <?= formatLotTimer($endTime, true) ?>
+                </div>
+                <div class="lot-item__cost-state">
+                    <div class="lot-item__rate">
+                        <span class="lot-item__amount">Текущая цена</span>
+                        <span class="lot-item__cost"><?= formatPrice($price) ?></span>
+                    </div>
+                    <div class="lot-item__min-cost">
+                        Мин. ставка <span><?= formatPrice($price + $priceStep) ?></span>
+                    </div>
+                </div>
+                <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
+                    <p class="lot-item__form-item">
+                        <label for="cost">Ваша ставка</label>
+                        <input id="cost" type="number" name="cost" placeholder="<?= ($price + $priceStep) ?>">
+                    </p>
+                    <button type="submit" class="button">Сделать ставку</button>
+                </form>
+            </div>
+            <div class="history">
+                <h3>История ставок (<span><?= $betCount ?></span>)</h3>
+                <table class="history__list">
+                    <?= $_betListContent ?>
+                </table>
             </div>
         </div>
     </div>
-</li>
+</section>
