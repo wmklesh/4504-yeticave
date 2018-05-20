@@ -10,7 +10,7 @@ function getConnection()
         $connection = mysqli_connect($config['dbHost'], $config['dbUser'], $config['dbPass'], $config['dbName']);
         mysqli_set_charset($connection, 'utf8');
 
-        if (! $connection) {
+        if (!$connection) {
             print('Ошибка: Невозможно подключиться к MySQL  ' . mysqli_connect_error());
             die();
         }
@@ -55,17 +55,17 @@ function includeTemplate(string $tpl, array $data)
 
 function formatLotTimer($endTime, bool $viewSec = false)
 {
-    $endTime = is_int($endTime)?: strtotime($endTime);
+    $endTime = is_int($endTime) ?: strtotime($endTime);
     $time = $endTime - time();
     $format = '%02d:%02d';
-    ! $viewSec ?: $format .= ':%02d';
+    !$viewSec ?: $format .= ':%02d';
 
     return sprintf($format, ($time / 3600) % 24, ($time / 60) % 60, $time % 60);
 }
 
 function formatBetTime($time)
 {
-    $time = is_int($time)?: strtotime($time);
+    $time = is_int($time) ?: strtotime($time);
 
     if ($time < 60) {
         $result = ($time % 60) . ' секунд назад';
@@ -101,9 +101,9 @@ function processQuery(array $parameterList, $connection = null)
 
 function addLimit(array &$parameterList)
 {
-    if ( (int) $parameterList['limit']) {
+    if ((int)$parameterList['limit']) {
         $parameterList['sql'] .= ' LIMIT ?';
-        $parameterList['data'][] = (int) $parameterList['limit'];
+        $parameterList['data'][] = (int)$parameterList['limit'];
     }
 
     return;
@@ -126,7 +126,8 @@ function getLotList(int $limit = null, $connection = null)
     return processQuery($parameterList, $connection);
 }
 
-function getCatList(int $limit = null, $connection = null) {
+function getCatList(int $limit = null, $connection = null)
+{
     $sql = 'SELECT * FROM category';
 
     $parameterList = [
@@ -138,7 +139,8 @@ function getCatList(int $limit = null, $connection = null) {
     return processQuery($parameterList, $connection);
 }
 
-function getLot(int $lotId, $connection = null) {
+function getLot(int $lotId, $connection = null)
+{
     $sql = 'SELECT l.*, c.name category_name 
             FROM lot l
               JOIN category c ON c.id = l.category_id
@@ -153,7 +155,8 @@ function getLot(int $lotId, $connection = null) {
     return processQuery($parametersList, $connection);
 }
 
-function getBetList(int $lotId, int $limit = null, $connection = null) {
+function getBetList(int $lotId, int $limit = null, $connection = null)
+{
     $sql = 'SELECT b.*, u.name
             FROM bet b
               JOIN user u ON u.id = b.user_id
