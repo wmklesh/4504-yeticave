@@ -176,7 +176,7 @@ function getBetList(int $lotId, int $limit = null, $connection = null)
 
 function checkFormLotAdd(array $lot, array $photo)
 {
-    $required_fields = ['name', 'message', 'rate', 'step', 'date'];
+    $required_fields = ['name', 'message', 'rate', 'step'];
     $errors = [];
 
     foreach ($required_fields as $field) {
@@ -203,6 +203,15 @@ function checkFormLotAdd(array $lot, array $photo)
 
     if (!filter_var($lot['step'], FILTER_VALIDATE_INT)) {
         $errors['rate'] = 'Введите число';
+    }
+
+    $lotDate = strtotime($lot['date']);
+    if (is_numeric($lotDate)) {
+        if ($lotDate < time()) {
+            $errors['date'] = 'Дата не может быть в прошлом';
+        }
+    } else {
+        $errors['date'] = 'Выберите дату';
     }
 
     if ($photo['name'] == '') {

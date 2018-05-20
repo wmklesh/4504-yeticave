@@ -9,16 +9,16 @@ if ($_POST) {
 
     if ($checkResult === true) {
         $uploadDir = __DIR__;
-        $uploadFile = '/img/' . uniqid() . '.' . basename($_FILES['photo']['name']);
+        $uploadFile = '/img/' . uniqid() . '.' . pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
 
         $sql = 'INSERT INTO lot
                   (add_user_id, category_id, name, description, img, price, price_step, add_time, end_time)
                 VALUES 
-                  (1, 1, ?, ?, ?, ?, ?, NOW(), 1)';
+                  (1, ?, ?, ?, ?, ?, ?, NOW(), ?)';
 
         $parameterList = [
             'sql' => $sql,
-            'data' => [$lot['name'], $lot['message'], $uploadFile, $lot['rate'], $lot['step']],
+            'data' => [$lot['category'], $lot['name'], $lot['message'], $uploadFile, $lot['rate'], $lot['step'], $lot['date']],
             'limit' => null
         ];
 
