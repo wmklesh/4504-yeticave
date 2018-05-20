@@ -34,6 +34,7 @@ if ($_POST) {
 $categoryList = getCatList();
 $pageContent = includeTemplate('add', [
     'name' => $lot['name'] ?? '',
+    'category' => $lot['category'] ?? '',
     'message' => $lot['message'] ?? '',
     'rate' => $lot['rate'] ?? '',
     'step' => $lot['step'] ?? '',

@@ -32,8 +32,9 @@
             <label for="category">Категория</label>
             <select id="category" name="lot[category]" >
                 <option value="0">Выберите категорию</option>
+                <option value="123">В1234</option>
                 <?php foreach ($categoryList as $cat): ?>
-                    <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
+                    <option <?= $category == $cat['id'] ? 'selected' : '' ?> value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
                 <?php endforeach;?>
             </select>
             <span class="form__error"><?= $errors['category'] ?></span>

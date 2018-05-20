@@ -176,7 +176,7 @@ function getBetList(int $lotId, int $limit = null, $connection = null)
 
 function checkFormLotAdd(array $lot, array $photo)
 {
-    $required_fields = ['name', 'category', 'message', 'rate', 'step', 'date'];
+    $required_fields = ['name', 'message', 'rate', 'step', 'date'];
     $errors = [];
 
     foreach ($required_fields as $field) {
@@ -185,7 +185,15 @@ function checkFormLotAdd(array $lot, array $photo)
         }
     }
 
-    if (!filter_var($lot['category'], FILTER_VALIDATE_INT) || $lot['category'] == 0) {
+    $sql = 'SELECT * FROM category WHERE id = ?';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [$lot['category']],
+        'limit' => 1
+    ];
+
+    if (!processQuery($parameterList)) {
         $errors['category'] = 'Выберите категорию';
     }
 
