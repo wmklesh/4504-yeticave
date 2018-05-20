@@ -92,6 +92,10 @@ function processQuery(array $parameterList, $connection = null)
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
 
+    if ($res === false) {
+        return $res;
+    }
+
     if (mysqli_num_rows($res) > 1) {
         $result = mysqli_fetch_all($res, MYSQLI_ASSOC);
     } else {
@@ -174,7 +178,52 @@ function getBetList(int $lotId, int $limit = null, $connection = null)
     return processQuery($parameterList, $connection);
 }
 
-function checkFormLotAdd(array $lot, array $photo)
+function getRandomPhotoName(string $name)
+{
+    return uniqid('', true) . '.' . pathinfo($name, PATHINFO_EXTENSION);
+}
+
+function addLot(array $lot, array $photo)
+{
+    $checkForm = checkFormAddLot($lot);
+    $checkFile = checkPhotoAddLot($photo);
+    $errors = array_merge($checkForm, $checkFile);
+
+    if (count($errors) == 0) {
+        $config = getConfig();
+        $uploadDir = __DIR__ . '/../..';
+        $uploadFile = '/' . $config['imgDirUpload'] .'/' . getRandomPhotoName($photo['name']);
+
+        if (move_uploaded_file($photo['tmp_name'], $uploadDir . $uploadFile)) {
+            $sql = 'INSERT INTO lot
+                      (add_user_id, category_id, name, description, img, price, price_step, add_time, end_time)
+                    VALUES 
+                      (1, ?, ?, ?, ?, ?, ?, NOW(), ?)';
+
+            $parameterList = [
+                'sql' => $sql,
+                'data' => [
+                    $lot['category'],
+                    $lot['name'],
+                    $lot['message'],
+                    $uploadFile,
+                    $lot['rate'],
+                    $lot['step'],
+                    $lot['date']
+                ],
+                'limit' => null
+            ];
+
+            processQuery($parameterList);
+
+            return mysqli_insert_id(getConnection());
+        }
+    } else {
+        return $errors;
+    }
+}
+
+function checkFormAddLot(array $lot)
 {
     $required_fields = ['name', 'message', 'rate', 'step'];
     $errors = [];
@@ -214,7 +263,14 @@ function checkFormLotAdd(array $lot, array $photo)
         $errors['date'] = 'Выберите дату';
     }
 
-    if ($photo['name'] == '') {
+    return $errors;
+}
+
+function checkPhotoAddLot(array $photo)
+{
+    $errors = [];
+
+    if (empty($photo)) {
         $errors['photo'] = 'Выберите изображение';
     } else {
         $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -228,5 +284,5 @@ function checkFormLotAdd(array $lot, array $photo)
         }
     }
 
-    return count($errors) ? $errors : true;
+    return $errors;
 }

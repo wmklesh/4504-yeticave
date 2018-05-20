@@ -4,30 +4,12 @@ require __DIR__ . '/core/bootstrap.php';
 
 if ($_POST) {
     $lot = $_POST['lot'];
-    $photo = $_FILES['photo'];
-    $checkResult = checkFormLotAdd($lot, $photo);
+    $resultAddLot = addLot($lot, $_FILES['photo']);
 
-    if ($checkResult === true) {
-        $uploadDir = __DIR__;
-        $uploadFile = '/img/' . uniqid() . '.' . pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-
-        $sql = 'INSERT INTO lot
-                  (add_user_id, category_id, name, description, img, price, price_step, add_time, end_time)
-                VALUES 
-                  (1, ?, ?, ?, ?, ?, ?, NOW(), ?)';
-
-        $parameterList = [
-            'sql' => $sql,
-            'data' => [$lot['category'], $lot['name'], $lot['message'], $uploadFile, $lot['rate'], $lot['step'], $lot['date']],
-            'limit' => null
-        ];
-
-        if (move_uploaded_file($photo['tmp_name'], $uploadDir . $uploadFile)) {
-            processQuery($parameterList);
-            header('Location: lot.php?id=' . mysqli_insert_id(getConnection()));
-        }
+    if ($resultAddLot) {
+        header('Location: lot.php?id=' . $resultAddLot);
     } else {
-        $errors = $checkResult;
+        $errors = $resultAddLot;
     }
 }
 

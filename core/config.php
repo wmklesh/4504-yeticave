@@ -4,5 +4,6 @@ return [
     'dbHost' => 'localhost',
     'dbUser' => 'root',
     'dbPass' => 'root',
-    'dbName' => 'yeticave'
+    'dbName' => 'yeticave',
+    'imgDirUpload' => 'img'
 ];
