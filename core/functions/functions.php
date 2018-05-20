@@ -40,11 +40,9 @@ function includeTemplate(string $tpl, array $data)
     if (is_readable(__DIR__ . '/../../templates/' . $tpl . '.php')) {
 
         extract($data, EXTR_PREFIX_ALL, '');
-        array_walk($data, function (&$value) {
-            if (is_scalar($value)) {
-                $value = htmlspecialchars($value);
-            }
-        });
+        array_map(function (&$value) {
+            !is_scalar($value) ?: $value = htmlspecialchars($value);
+        }, $data);
         extract($data);
 
         ob_start();
