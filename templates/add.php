@@ -20,34 +20,31 @@
         </li>
     </ul>
 </nav>
-<form class="form form--add-lot container <?= !$errorCount ?: 'form--invalid' ?>" enctype="multipart/form-data" action="add.php" method="post"> <!-- form--invalid -->
+<form class="form form--add-lot container <?= !count($errors) ?: 'form--invalid' ?>" enctype="multipart/form-data" action="add.php" method="post"> <!-- form--invalid -->
     <h2>Добавление лота</h2>
     <div class="form__container-two">
-        <div class="form__item <?= !$errorName ?: 'form__item--invalid' ?>"> <!-- form__item--invalid -->
+        <div class="form__item <?= !$errors['name'] ?: 'form__item--invalid' ?>"> <!-- form__item--invalid -->
             <label for="lot-name">Наименование</label>
             <input id="lot-name" type="text" name="lot[name]" value="<?= $name ?>" placeholder="Введите наименование лота" >
-            <span class="form__error"><?= $errorName ?></span>
+            <span class="form__error"><?= $errors['name'] ?? '' ?></span>
         </div>
-        <div class="form__item">
+        <div class="form__item <?= !$errors['category'] ?: 'form__item--invalid' ?>">
             <label for="category">Категория</label>
             <select id="category" name="lot[category]" >
-                <option>Выберите категорию</option>
-                <option>Доски и лыжи</option>
-                <option>Крепления</option>
-                <option>Ботинки</option>
-                <option>Одежда</option>
-                <option>Инструменты</option>
-                <option>Разное</option>
+                <option value="0">Выберите категорию</option>
+                <?php foreach ($categoryList as $cat): ?>
+                    <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
+                <?php endforeach;?>
             </select>
-            <span class="form__error"><?= $errorCategory ?></span>
+            <span class="form__error"><?= $errors['category'] ?></span>
         </div>
     </div>
-    <div class="form__item form__item--wide <?= !$errorMessage ?: 'form__item--invalid' ?>">
+    <div class="form__item form__item--wide <?= !$errors['message'] ?: 'form__item--invalid' ?>">
         <label for="message">Описание</label>
         <textarea id="message" name="lot[message]" placeholder="Напишите описание лота" ><?= $message ?></textarea>
-        <span class="form__error"><?= $errorMessage ?></span>
+        <span class="form__error"><?= $errors['message'] ?></span>
     </div>
-    <div class="form__item form__item--file"> <!-- form__item--uploaded -->
+    <div class="form__item form__item--file <?= !$errors['photo'] ?: 'form__item--invalid' ?>"> <!-- form__item--uploaded -->
         <label>Изображение</label>
         <div class="preview">
             <button class="preview__remove" type="button">x</button>
@@ -61,22 +58,23 @@
                 <span>+ Добавить</span>
             </label>
         </div>
+        <span class="form__error"><?= $errors['photo'] ?></span>
     </div>
     <div class="form__container-three">
-        <div class="form__item form__item--small <?= !$errorRate ?: 'form__item--invalid' ?>">
+        <div class="form__item form__item--small <?= !$errors['rate'] ?: 'form__item--invalid' ?>">
             <label for="lot-rate">Начальная цена</label>
             <input id="lot-rate" type="number" name="lot[rate]" value="<?= $rate ?>" placeholder="0" >
-            <span class="form__error"><?= $errorRate ?></span>
+            <span class="form__error"><?= $errors['rate'] ?></span>
         </div>
-        <div class="form__item form__item--small <?= !$errorStep ?: 'form__item--invalid' ?>">
+        <div class="form__item form__item--small <?= !$errors['step'] ?: 'form__item--invalid' ?>">
             <label for="lot-step">Шаг ставки</label>
             <input id="lot-step" type="number" name="lot[step]" value="<?= $step ?>" placeholder="0" >
-            <span class="form__error"><?= $errorStep ?></span>
+            <span class="form__error"><?= $errors['step'] ?></span>
         </div>
-        <div class="form__item <?= !$errorDate ?: 'form__item--invalid' ?>">
+        <div class="form__item <?= !$errors['date'] ?: 'form__item--invalid' ?>">
             <label for="lot-date">Дата окончания торгов</label>
             <input class="form__input-date" id="lot-date" type="date" name="lot[date]" value="<?= $date ?>" >
-            <span class="form__error"><?= $errorDate ?></span>
+            <span class="form__error"><?= $errors['date'] ?></span>
         </div>
     </div>
     <span class="form__error form__error--bottom">Пожалуйста, исправьте ошибки в форме.</span>

@@ -41,7 +41,9 @@ function includeTemplate(string $tpl, array $data)
 
         extract($data, EXTR_PREFIX_ALL, '');
         array_walk($data, function (&$value) {
-            $value = htmlspecialchars($value);
+            if (is_scalar($value)) {
+                $value = htmlspecialchars($value);
+            }
         });
         extract($data);
 
@@ -170,4 +172,44 @@ function getBetList(int $lotId, int $limit = null, $connection = null)
     ];
 
     return processQuery($parameterList, $connection);
+}
+
+function checkFormLotAdd(array $lot, array $photo)
+{
+    $required_fields = ['name', 'category', 'message', 'rate', 'step', 'date'];
+    $errors = [];
+
+    foreach ($required_fields as $field) {
+        if (empty($lot[$field])) {
+            $errors[$field] = 'Поле не заполнено';
+        }
+    }
+
+    if (!filter_var($lot['category'], FILTER_VALIDATE_INT) || $lot['category'] == 0) {
+        $errors['category'] = 'Выберите категорию';
+    }
+
+    if (!filter_var($lot['rate'], FILTER_VALIDATE_INT)) {
+        $errors['rate'] = 'Введите число';
+    }
+
+    if (!filter_var($lot['step'], FILTER_VALIDATE_INT)) {
+        $errors['rate'] = 'Введите число';
+    }
+
+    if ($photo['name'] == '') {
+        $errors['photo'] = 'Выберите изображение';
+    } else {
+        $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
+        $fileName = $photo['tmp_name'];
+        $fileType = finfo_file($fileInfo, $fileName);
+
+        $fileFormat = ['image/jpeg', 'image/jpg', 'image/png'];
+
+        if (!in_array($fileType, $fileFormat)) {
+            $errors['photo'] = 'Выберите фотографию формата JPEG, JPG или PNG';
+        }
+    }
+
+    return count($errors) ? $errors : true;
 }

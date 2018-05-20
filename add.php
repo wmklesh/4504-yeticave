@@ -2,38 +2,12 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
-$required_fields = ['name', 'category', 'message', 'rate', 'step', 'date'];
-$errors = [];
-
 if ($_POST) {
     $lot = $_POST['lot'];
+    $photo = $_FILES['photo'];
+    $checkResult = checkFormLotAdd($lot, $photo);
 
-    foreach ($required_fields as $field) {
-        if (empty($lot[$field])) {
-            $errors[$field] = 'Поле не заполнено';
-        }
-
-        if ($field == 'rate' || $field == 'step') {
-            if (!filter_var($lot[$field], FILTER_VALIDATE_INT)) {
-                $errors[$field] = 'Введите число';
-            }
-        }
-    }
-
-    if ($_FILES['photo']['name'] != '') {
-        $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
-        $fileName = $_FILES['photo']['tmp_name'];
-        $fileType = finfo_file($fileInfo, $fileName);
-
-        $fileFormat = ['image/jpeg', 'image/jpg', 'image/png'];
-        if (!in_array($fileType, $fileFormat)) {
-            $errors['photo'] = 'Загрузите картинку формата JPEG, JPG или PNG';
-        }
-    } else {
-        $errors['photo'] = 'Загрузите изображение';
-    }
-
-    if (!count($errors)) {
+    if ($checkResult === true) {
         $uploadDir = __DIR__;
         $uploadFile = '/img/' . uniqid() . '.' . basename($_FILES['photo']['name']);
 
@@ -48,30 +22,27 @@ if ($_POST) {
             'limit' => null
         ];
 
-        if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $uploadFile)) {
+        if (move_uploaded_file($photo['tmp_name'], $uploadDir . $uploadFile)) {
             processQuery($parameterList);
             header('Location: lot.php?id=' . mysqli_insert_id(getConnection()));
         }
+    } else {
+        $errors = $checkResult;
     }
 }
 
+$categoryList = getCatList();
 $pageContent = includeTemplate('add', [
     'name' => $lot['name'] ?? '',
     'message' => $lot['message'] ?? '',
     'rate' => $lot['rate'] ?? '',
     'step' => $lot['step'] ?? '',
     'date' => $lot['date'] ?? '',
-    'errorCount' => count($errors),
-    'errorName' => $errors['name'] ?? '',
-    'errorCategory' => $errors['category'] ?? '',
-    'errorMessage' => $errors['message'] ?? '',
-    'errorRate' => $errors['rate'] ?? '',
-    'errorStep' => $errors['step'] ?? '',
-    'errorDate' => $errors['date'] ?? '',
+    'errors' => $errors ?? [],
+    'categoryList' => $categoryList
 
 ]);
 
-$categoryList = getCatList();
 $catListContent = '';
 foreach ($categoryList as $category) {
     $catListContent .= includeTemplate('nav-item', ['name' => $category['name']]);
