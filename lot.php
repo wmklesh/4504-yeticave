@@ -1,7 +1,6 @@
 <?php
 
 require __DIR__ . '/core/bootstrap.php';
-require __DIR__ . '/data.php';
 
 $lotId = filter_var($_GET['id'], FILTER_VALIDATE_INT);
 
@@ -14,7 +13,7 @@ if ($lotId == false || $lot == false) {
     exit;
 }
 
-$betList = getBetList($lot['id']);
+$betList = getBetList($lot['id']) ?? [];
 $betListContent = '';
 foreach ($betList as $bet) {
     $betListContent .= includeTemplate('bet-table', [
