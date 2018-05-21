@@ -40,8 +40,8 @@ function includeTemplate(string $tpl, array $data)
     if (is_readable(__DIR__ . '/../../templates/' . $tpl . '.php')) {
 
         extract($data, EXTR_PREFIX_ALL, '');
-        array_map(function (&$value) {
-            !is_scalar($value) ?: $value = htmlspecialchars($value);
+        $data = array_map(function ($value) {
+            return is_scalar($value) ? htmlspecialchars($value) : $value;
         }, $data);
         extract($data);
 
@@ -181,18 +181,25 @@ function getRandomPhotoName(string $name)
     return uniqid('', true) . '.' . pathinfo($name, PATHINFO_EXTENSION);
 }
 
+function saveImage(array $image)
+{
+    $config = getConfig();
+    $uploadDir = __DIR__ . '/../../';
+    $uploadFile = $config['imgDirUpload'] .'/' . getRandomPhotoName($image['name']);
+
+    if (move_uploaded_file($image['tmp_name'], $uploadDir . $uploadFile)) {
+        return $uploadFile;
+    } else {
+        return false;
+    }
+}
+
 function addLot(array $lot, array $photo)
 {
-    $checkForm = checkFormAddLot($lot);
-    $checkFile = checkPhotoAddLot($photo);
-    $errors = array_merge($checkForm, $checkFile);
+    $errors = array_merge(checkFormAddLot($lot), checkImage($photo));
 
-    if (count($errors) == 0) {
-        $config = getConfig();
-        $uploadDir = __DIR__ . '/../..';
-        $uploadFile = '/' . $config['imgDirUpload'] .'/' . getRandomPhotoName($photo['name']);
-
-        if (move_uploaded_file($photo['tmp_name'], $uploadDir . $uploadFile)) {
+    if (empty($errors)) {
+        if ($fileName = saveImage($photo)) {
             $sql = 'INSERT INTO lot
                       (add_user_id, category_id, name, description, img, price, price_step, add_time, end_time)
                     VALUES 
@@ -204,7 +211,7 @@ function addLot(array $lot, array $photo)
                     $lot['category'],
                     $lot['name'],
                     $lot['message'],
-                    $uploadFile,
+                    $fileName,
                     $lot['rate'],
                     $lot['step'],
                     $lot['date']
@@ -221,40 +228,53 @@ function addLot(array $lot, array $photo)
     }
 }
 
-function checkFormAddLot(array $lot)
+function formRequiredFields (array $form, array $fields)
 {
-    $required_fields = ['name', 'message', 'rate', 'step'];
     $errors = [];
 
-    foreach ($required_fields as $field) {
-        if (empty($lot[$field])) {
+    foreach ($fields as $field) {
+        if (empty($form[$field])) {
             $errors[$field] = 'Поле не заполнено';
         }
     }
 
-    $sql = 'SELECT * FROM category WHERE id = ?';
+    return $errors;
+}
 
-    $parameterList = [
-        'sql' => $sql,
-        'data' => [$lot['category']],
-        'limit' => 1
-    ];
+function checkFromRate($var) {
+    return filter_var($var, FILTER_VALIDATE_INT);
+}
 
-    if (!processQuery($parameterList)) {
+function checkFromStep($var) {
+    return filter_var($var, FILTER_VALIDATE_INT);
+}
+
+function isDate($var) {
+    return is_numeric(strtotime($var));
+}
+
+function isFutureDate($var) {
+    return strtotime($var) > time();
+}
+
+function checkFormAddLot(array $lot)
+{
+    $errors = formRequiredFields($lot, ['name', 'message', 'rate', 'step']);
+
+    if (!getLot($lot['category'])) {
         $errors['category'] = 'Выберите категорию';
     }
 
-    if (!filter_var($lot['rate'], FILTER_VALIDATE_INT)) {
+    if (!checkFromRate($lot['rate'])) {
         $errors['rate'] = 'Введите число';
     }
 
-    if (!filter_var($lot['step'], FILTER_VALIDATE_INT)) {
+    if (!checkFromStep($lot['step'])) {
         $errors['rate'] = 'Введите число';
     }
 
-    $lotDate = strtotime($lot['date']);
-    if (is_numeric($lotDate)) {
-        if ($lotDate < time()) {
+    if (isDate($lot['date'])) {
+        if (!isFutureDate($lot['date'])) {
             $errors['date'] = 'Дата не может быть в прошлом';
         }
     } else {
@@ -264,21 +284,21 @@ function checkFormAddLot(array $lot)
     return $errors;
 }
 
-function checkPhotoAddLot(array $photo)
+function checkImage(array $photo)
 {
     $errors = [];
 
-    if (empty($photo)) {
+    if (empty($photo['size'])) {
         $errors['photo'] = 'Выберите изображение';
     } else {
         $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
         $fileName = $photo['tmp_name'];
         $fileType = finfo_file($fileInfo, $fileName);
 
-        $fileFormat = ['image/jpeg', 'image/jpg', 'image/png'];
+        $fileFormat = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
         if (!in_array($fileType, $fileFormat)) {
-            $errors['photo'] = 'Выберите фотографию формата JPEG, JPG или PNG';
+            $errors['photo'] = 'Выберите фотографию формата JPEG, JPG, PNG или WebP';
         }
     }
 

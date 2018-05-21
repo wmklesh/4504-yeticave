@@ -6,7 +6,7 @@ if ($_POST) {
     $lot = $_POST['lot'];
     $resultAddLot = addLot($lot, $_FILES['photo']);
 
-    if ($resultAddLot) {
+    if (is_numeric($resultAddLot)) {
         header('Location: lot.php?id=' . $resultAddLot);
     } else {
         $errors = $resultAddLot;
