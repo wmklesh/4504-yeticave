@@ -5,5 +5,6 @@ return [
     'dbUser' => 'root',
     'dbPass' => 'root',
     'dbName' => 'yeticave',
-    'imgDirUpload' => 'img'
+    'imgDirUpload' => 'img',
+    'avatarDirUpload' => 'img/avatars'
 ];

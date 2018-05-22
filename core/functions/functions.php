@@ -181,11 +181,10 @@ function getRandomPhotoName(string $name)
     return uniqid('', true) . '.' . pathinfo($name, PATHINFO_EXTENSION);
 }
 
-function saveImage(array $image)
+function saveImage(array $image, string $dir)
 {
-    $config = getConfig();
     $uploadDir = __DIR__ . '/../../';
-    $uploadFile = $config['imgDirUpload'] .'/' . getRandomPhotoName($image['name']);
+    $uploadFile = $dir . '/' . getRandomPhotoName($image['name']);
 
     if (move_uploaded_file($image['tmp_name'], $uploadDir . $uploadFile)) {
         return $uploadFile;
@@ -196,10 +195,13 @@ function saveImage(array $image)
 
 function addLot(array $lot, array $photo)
 {
-    $errors = array_merge(checkFormAddLot($lot), checkImage($photo));
+    $errors = array_merge(checkFormAddLot($lot), checkImage($photo, 'photo'));
+
+    var_dump($errors);
 
     if (empty($errors)) {
-        if ($fileName = saveImage($photo)) {
+        $config = getConfig();
+        if ($fileName = saveImage($photo, $config['imgDirUpload'])) {
             $sql = 'INSERT INTO lot
                       (add_user_id, category_id, name, description, img, price, price_step, add_time, end_time)
                     VALUES 
@@ -228,7 +230,7 @@ function addLot(array $lot, array $photo)
     }
 }
 
-function formRequiredFields (array $form, array $fields)
+function formRequiredFields(array $form, array $fields)
 {
     $errors = [];
 
@@ -241,20 +243,29 @@ function formRequiredFields (array $form, array $fields)
     return $errors;
 }
 
-function checkFromRate($var) {
+function checkFromRate($var)
+{
     return filter_var($var, FILTER_VALIDATE_INT);
 }
 
-function checkFromStep($var) {
+function checkFromStep($var)
+{
     return filter_var($var, FILTER_VALIDATE_INT);
 }
 
-function isDate($var) {
+function isDate($var)
+{
     return is_numeric(strtotime($var));
 }
 
-function isFutureDate($var) {
+function isFutureDate($var)
+{
     return strtotime($var) > time();
+}
+
+function isEmail($var)
+{
+    return filter_var($var, FILTER_VALIDATE_EMAIL);
 }
 
 function checkFormAddLot(array $lot)
@@ -265,12 +276,12 @@ function checkFormAddLot(array $lot)
         $errors['category'] = 'Выберите категорию';
     }
 
-    if (!checkFromRate($lot['rate'])) {
+    if (!checkFromRate($lot['rate']) && empty($errors['rate'])) {
         $errors['rate'] = 'Введите число';
     }
 
-    if (!checkFromStep($lot['step'])) {
-        $errors['rate'] = 'Введите число';
+    if (!checkFromStep($lot['step']) && empty($errors['step'])) {
+        $errors['step'] = 'Введите число';
     }
 
     if (isDate($lot['date'])) {
@@ -284,23 +295,90 @@ function checkFormAddLot(array $lot)
     return $errors;
 }
 
-function checkImage(array $photo)
+function checkImage(array $img, string $key)
 {
-    $errors = [];
+    $error = [];
 
-    if (empty($photo['size'])) {
-        $errors['photo'] = 'Выберите изображение';
+    if (empty($img['size'])) {
+        $error[$key] = 'Выберите изображение';
     } else {
         $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
-        $fileName = $photo['tmp_name'];
+        $fileName = $img['tmp_name'];
         $fileType = finfo_file($fileInfo, $fileName);
 
         $fileFormat = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
         if (!in_array($fileType, $fileFormat)) {
-            $errors['photo'] = 'Выберите фотографию формата JPEG, JPG, PNG или WebP';
+            $error[$key] = 'Выберите фотографию формата JPEG, JPG, PNG или WebP';
+        }
+    }
+
+    return $error;
+}
+
+function checkFromAddUser(array $user)
+{
+    $errors = formRequiredFields($user, ['email', 'password', 'name', 'message']);
+
+    if (empty($errors['email'])) {
+        if (!isEmail($user['email'])) {
+            $errors['email'] = 'Не верно указан email';
+        } elseif (getUserByEmail($user['email'])) {
+            $errors['email'] = 'Пользователь с указанным email уже существует';
         }
     }
 
     return $errors;
+}
+
+function addUser(array $user, array $avatar)
+{
+    $errors = array_merge(checkFromAddUser($user), checkImage($avatar, 'avatar'));
+
+    if (empty($errors)) {
+        $config = getConfig();
+        if ($fileName = saveImage($avatar, $config['avatarDirUpload'])) {
+            $sql = 'INSERT INTO user 
+                      (email, name, password_hash, avatar, contact)
+                    VALUES
+                      (?, ?, ?, ?, ?)';
+
+            $parameterList = [
+                'sql' => $sql,
+                'data' => [
+                    $user['email'],
+                    $user['name'],
+                    password_hash($user['password'], PASSWORD_DEFAULT),
+                    $fileName,
+                    $user['message']
+                ],
+                'limit' => null
+            ];
+
+            processQuery($parameterList);
+
+            return true;
+        }
+    } else {
+        return $errors;
+    }
+}
+
+function getUserByEmail(string $email)
+{
+    if (empty($email)) {
+        return false;
+    }
+
+    $sql = 'SELECT * FROM user WHERE email = ?';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [
+            $email
+        ],
+        'limit' => 1
+    ];
+
+    return processQuery($parameterList);
 }
