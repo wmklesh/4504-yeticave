@@ -197,8 +197,6 @@ function addLot(array $lot, array $photo)
 {
     $errors = array_merge(checkFormAddLot($lot), checkImage($photo, 'photo'));
 
-    var_dump($errors);
-
     if (empty($errors)) {
         $config = getConfig();
         if ($fileName = saveImage($photo, $config['imgDirUpload'])) {

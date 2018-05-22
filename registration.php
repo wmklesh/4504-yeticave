@@ -4,7 +4,6 @@ require __DIR__ . '/core/bootstrap.php';
 
 if ($_POST) {
     $user = $_POST['user'];
-    var_dump($_FILES['avatar']);
     $resultAddUser = addUser($user, $_FILES['avatar']);
 
     if ($resultAddUser === true) {
