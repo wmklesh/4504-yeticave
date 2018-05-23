@@ -380,3 +380,42 @@ function getUserByEmail(string $email)
 
     return processQuery($parameterList);
 }
+
+function checkFormLoginUser(array $user) {
+    $errors = formRequiredFields($user, ['email', 'password']);
+
+    if (empty($errors['email'])) {
+        if (!isEmail($user['email'])) {
+            $errors['email'] = 'Нe верно указан email';
+        }
+    }
+
+    return $errors;
+}
+
+function loginUser(array $user) {
+    $errors = checkFormLoginUser($user);
+
+    if (empty($errors)) {
+        if ($queryUser = getUserByEmail($user['email'])) {
+            if (password_verify($user['password'], $queryUser['password_hash'])) {
+                return [true, $queryUser];
+            } else {
+                $errors['password'] = 'Неверный пароль.';
+            }
+        } else {
+            $errors['email'] = 'Пользователь с таким email не найден.';
+        }
+    }
+
+    return [false, $errors];
+}
+
+function access($user) {
+    if (empty($user)) {
+        http_response_code(404);
+        exit;
+    }
+
+    return true;
+}

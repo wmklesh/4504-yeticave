@@ -2,6 +2,8 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
+access($_SESSION['user'] ?? null);
+
 if ($_POST) {
     $lot = $_POST['lot'];
     $resultAddLot = addLot($lot, $_FILES['photo']);
@@ -34,9 +36,9 @@ foreach ($categoryList as $category) {
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,
     'catListContent' => $catListContent,
-    'is_auth' => $is_auth,
-    'user_name' => $user_name,
-    'user_avatar' => $user_avatar,
+    'isAuth' => empty($_SESSION['user']) ? false : true,
+    'userName' => $_SESSION['user']['name'] ?? null,
+    'userAvatar' => $_SESSION['user']['avatar'] ?? null,
     'title' => 'Yeticave - Добавление лота'
 ]);
 

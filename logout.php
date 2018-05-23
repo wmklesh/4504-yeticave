@@ -1,7 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: klesh
- * Date: 23.05.2018
- * Time: 14:38
- */
+
+require __DIR__ . '/core/bootstrap.php';
+
+unset($_SESSION['user']);
+header('Location: index.php');

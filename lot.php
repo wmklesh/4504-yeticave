@@ -24,6 +24,7 @@ foreach ($betList as $bet) {
 }
 
 $pageContent = includeTemplate('lot', [
+    'isAuth' => empty($_SESSION['user']) ? false : true,
     'name' => $lot['name'],
     'description' => $lot['description'],
     'img' => $lot['img'],
@@ -44,10 +45,10 @@ foreach ($categoryList as $category) {
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,
     'catListContent' => $catListContent,
-    'is_auth' => $is_auth,
-    'user_name' => $user_name,
-    'user_avatar' => $user_avatar,
-    'title' => ''
+    'isAuth' => empty($_SESSION['user']) ? false : true,
+    'userName' => $_SESSION['user']['name'] ?? null,
+    'userAvatar' => $_SESSION['user']['avatar'] ?? null,
+    'title' => 'Yeticave - ' . $lot['name']
 ]);
 
 echo $layoutContent;
