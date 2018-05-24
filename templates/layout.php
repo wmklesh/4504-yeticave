@@ -18,15 +18,17 @@
             <input type="search" name="search" placeholder="Поиск лота">
             <input class="main-header__search-btn" type="submit" name="find" value="Найти">
         </form>
-        <a class="main-header__add-lot button" href="add.php">Добавить лот</a>
-
+        <?php if ($isAuth == true): ?>
+            <a class="main-header__add-lot button" href="add.php">Добавить лот</a>
+        <?php endif; ?>
         <nav class="user-menu">
-            <?php if ($is_auth == true): ?>
+            <?php if ($isAuth == true): ?>
                 <div class="user-menu__image">
-                    <img src="<?= $user_avatar ?>" width="40" height="40" alt="Пользователь">
+                    <img src="<?= $userAvatar ?>" width="40" height="40" alt="Пользователь">
                 </div>
                 <div class="user-menu__logged">
-                    <p><?= $user_name ?></p>
+                    <p><?= $userName ?></p>
+                    <a href="logout.php">Выход</a>
                 </div>
             <?php else: ?>
                 <ul class="user-menu__list">

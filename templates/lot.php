@@ -44,13 +44,15 @@
                         Мин. ставка <span><?= formatPrice($price + $priceStep) ?></span>
                     </div>
                 </div>
-                <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
-                    <p class="lot-item__form-item">
-                        <label for="cost">Ваша ставка</label>
-                        <input id="cost" type="number" name="cost" placeholder="<?= ($price + $priceStep) ?>">
-                    </p>
-                    <button type="submit" class="button">Сделать ставку</button>
-                </form>
+                <?php if ($isAuth == true): ?>
+                    <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
+                        <p class="lot-item__form-item">
+                            <label for="cost">Ваша ставка</label>
+                            <input id="cost" type="number" name="cost" placeholder="<?= ($price + $priceStep) ?>">
+                        </p>
+                        <button type="submit" class="button">Сделать ставку</button>
+                    </form>
+                <?php endif; ?>
             </div>
             <div class="history">
                 <h3>История ставок (<span><?= $betCount ?></span>)</h3>

@@ -380,3 +380,71 @@ function getUserByEmail(string $email)
 
     return processQuery($parameterList);
 }
+
+function checkFormLoginUser(array $user) {
+    $errors = formRequiredFields($user, ['email', 'password']);
+
+    if (empty($errors['email'])) {
+        if (!isEmail($user['email'])) {
+            $errors['email'] = 'Нe верно указан email';
+        }
+    }
+
+    return $errors;
+}
+
+function passwordReHash(array $queryUser, string $password)
+{
+    $options = [
+        'cost' => 10
+    ];
+
+    if (password_needs_rehash($queryUser['password_hash'], PASSWORD_BCRYPT, $options)) {
+        $newHash = password_hash($password, PASSWORD_BCRYPT, $options);
+
+        $sql = 'UPDATE user SET password_hash = ? WHERE id = ?';
+
+        $parameterList = [
+            'sql' => $sql,
+            'data' => [
+                $newHash,
+                $queryUser['id']
+            ],
+            'limit' => 1
+        ];
+
+        processQuery($parameterList);
+
+        return $newHash;
+    }
+
+    return $queryUser['password_hash'];
+}
+
+function loginUser(array $user) {
+    $errors = checkFormLoginUser($user);
+
+    if (empty($errors)) {
+        if ($queryUser = getUserByEmail($user['email'])) {
+            if (password_verify($user['password'], $queryUser['password_hash'])) {
+                $queryUser['password_hash'] = passwordReHash($queryUser, $user['password']);
+
+                return [true, $queryUser];
+            } else {
+                $errors['password'] = 'Неверный пароль.';
+            }
+        } else {
+            $errors['email'] = 'Пользователь с таким email не найден.';
+        }
+    }
+
+    return [false, $errors];
+}
+
+function isAuthorized() {
+    if (empty($_SESSION['user'])) {
+        return true;
+    }
+
+    return false;
+}
