@@ -400,7 +400,6 @@ function passwordReHash(array $queryUser, string $password)
     ];
 
     if (password_needs_rehash($queryUser['password_hash'], PASSWORD_BCRYPT, $options)) {
-        echo 123;
         $newHash = password_hash($password, PASSWORD_BCRYPT, $options);
 
         $sql = 'UPDATE user SET password_hash = ? WHERE id = ?';
