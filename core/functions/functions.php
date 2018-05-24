@@ -393,12 +393,43 @@ function checkFormLoginUser(array $user) {
     return $errors;
 }
 
+function passwordReHash(array $queryUser, string $password)
+{
+    $options = [
+        'cost' => 10
+    ];
+
+    if (password_needs_rehash($queryUser['password_hash'], PASSWORD_BCRYPT, $options)) {
+        echo 123;
+        $newHash = password_hash($password, PASSWORD_BCRYPT, $options);
+
+        $sql = 'UPDATE user SET password_hash = ? WHERE id = ?';
+
+        $parameterList = [
+            'sql' => $sql,
+            'data' => [
+                $newHash,
+                $queryUser['id']
+            ],
+            'limit' => 1
+        ];
+
+        processQuery($parameterList);
+
+        return $newHash;
+    }
+
+    return $queryUser['password_hash'];
+}
+
 function loginUser(array $user) {
     $errors = checkFormLoginUser($user);
 
     if (empty($errors)) {
         if ($queryUser = getUserByEmail($user['email'])) {
             if (password_verify($user['password'], $queryUser['password_hash'])) {
+                $queryUser['password_hash'] = passwordReHash($queryUser, $user['password']);
+
                 return [true, $queryUser];
             } else {
                 $errors['password'] = 'Неверный пароль.';
@@ -411,11 +442,10 @@ function loginUser(array $user) {
     return [false, $errors];
 }
 
-function access($user) {
-    if (empty($user)) {
-        http_response_code(404);
-        exit;
+function isAuthorized() {
+    if (empty($_SESSION['user'])) {
+        return true;
     }
 
-    return true;
+    return false;
 }

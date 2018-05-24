@@ -2,7 +2,10 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
-access($_SESSION['user'] ?? null);
+if ($isAuthorized === false) {
+    http_response_code(404);
+    exit;
+}
 
 if ($_POST) {
     $lot = $_POST['lot'];
