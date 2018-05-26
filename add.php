@@ -2,7 +2,7 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
-if ($isAuthorized === false) {
+if (isAuthorized() === false) {
     http_response_code(404);
     exit;
 }

@@ -14,6 +14,21 @@ if ($lotId == false || $lot == false) {
 }
 
 $betList = getBetList($lot['id']) ?? [];
+
+if (isAuthorized() === true && $_POST) {
+    $minPrice = ($betList[0]['price'] ?? $lot['price']) + $lot['price_step'];
+    $resultAddBet = addBet($lot['id'], $_POST['bet'], $minPrice);
+
+    var_dump($resultAddBet);
+
+    if ($resultAddBet === true) {
+        header('Location: lot.php?id=' . $lot['id']);
+        exit;
+    } else {
+        $errors = $resultAddBet;
+    }
+}
+
 $betListContent = '';
 foreach ($betList as $bet) {
     $betListContent .= includeTemplate('bet-table', [
@@ -25,6 +40,7 @@ foreach ($betList as $bet) {
 
 $pageContent = includeTemplate('lot', [
     'isAuth' => empty($_SESSION['user']) ? false : true,
+    'lotId' => $lot['id'],
     'name' => $lot['name'],
     'description' => $lot['description'],
     'img' => $lot['img'],

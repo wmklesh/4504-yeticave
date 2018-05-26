@@ -8,8 +8,8 @@ if ($_POST) {
 
     if ($isLogin === true) {
         $_SESSION['user'] = $resultAutUser;
-        //header('Location: index.php');
-        //exit;
+        header('Location: index.php');
+        exit;
     } else {
         $errors = $resultAutUser;
     }

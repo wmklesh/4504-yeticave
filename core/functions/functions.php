@@ -381,7 +381,8 @@ function getUserByEmail(string $email)
     return processQuery($parameterList);
 }
 
-function checkFormLoginUser(array $user) {
+function checkFormLoginUser(array $user)
+{
     $errors = formRequiredFields($user, ['email', 'password']);
 
     if (empty($errors['email'])) {
@@ -395,12 +396,8 @@ function checkFormLoginUser(array $user) {
 
 function passwordReHash(array $queryUser, string $password)
 {
-    $options = [
-        'cost' => 10
-    ];
-
-    if (password_needs_rehash($queryUser['password_hash'], PASSWORD_BCRYPT, $options)) {
-        $newHash = password_hash($password, PASSWORD_BCRYPT, $options);
+    if (password_needs_rehash($queryUser['password_hash'], PASSWORD_DEFAULT)) {
+        $newHash = password_hash($password, PASSWORD_DEFAULT);
 
         $sql = 'UPDATE user SET password_hash = ? WHERE id = ?';
 
@@ -421,7 +418,8 @@ function passwordReHash(array $queryUser, string $password)
     return $queryUser['password_hash'];
 }
 
-function loginUser(array $user) {
+function loginUser(array $user)
+{
     $errors = checkFormLoginUser($user);
 
     if (empty($errors)) {
@@ -441,10 +439,61 @@ function loginUser(array $user) {
     return [false, $errors];
 }
 
-function isAuthorized() {
-    if (empty($_SESSION['user'])) {
+function isAuthorized()
+{
+    if (!empty($_SESSION['user'])) {
         return true;
     }
 
     return false;
+}
+
+function isBet($var)
+{
+    return filter_var($var, FILTER_VALIDATE_INT);
+}
+
+function formAddBet(array $bet, $minPrice)
+{
+    $errors = formRequiredFields($bet, ['cost']);
+
+    if (empty($errors)) {
+        if (isBet($bet['cost'])) {
+            if ($bet['cost'] < $minPrice) {
+                $errors['cost'] = 'Ставка не может быть ниже минимальной';
+            }
+        } else {
+            $errors['cost'] = 'Неверно указана цена';
+        }
+    }
+
+    return $errors;
+}
+
+function addBet(int $lotId, array $bet, int $minPrice)
+{
+    $errors = formAddBet($bet, $minPrice);
+
+    if (empty($errors)) {
+        $sql = 'INSERT INTO bet
+                  (user_id, lot_id, add_time, price)
+                VALUES
+                  (?, ?, NOW(), ?)';
+
+        $parameterList = [
+            'sql' => $sql,
+            'data' => [
+                $_SESSION['user']['id'],
+                $lotId,
+                $bet['cost']
+            ],
+            'limit' => null
+        ];
+
+        processQuery($parameterList);
+
+        return true;
+    }
+
+    return $errors;
 }
