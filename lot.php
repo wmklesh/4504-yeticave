@@ -2,7 +2,7 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
-$lotId = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+$lotId = filter_var($_GET['id'] ?? 0, FILTER_VALIDATE_INT);
 
 if ($lotId) {
     $lot = getLot($lotId);
@@ -15,11 +15,9 @@ if ($lotId == false || $lot == false) {
 
 $betList = getBetList($lot['id']) ?? [];
 
-if (isAuthorized() === true && $_POST) {
+if (isAuthorized() && $_POST) {
     $minPrice = ($betList[0]['price'] ?? $lot['price']) + $lot['price_step'];
     $resultAddBet = addBet($lot['id'], $_POST['bet'], $minPrice);
-
-    var_dump($resultAddBet);
 
     if ($resultAddBet === true) {
         header('Location: lot.php?id=' . $lot['id']);
@@ -49,6 +47,7 @@ $pageContent = includeTemplate('lot', [
     'categoryName' => $lot['category_name'],
     'endTime' => $lot['end_time'],
     'betCount' => count($betList),
+    'viewFormBet' => viewBetFrom($lot, $betList[0]['user_id'] ?? null),
     'betListContent' => $betListContent
 ]);
 
