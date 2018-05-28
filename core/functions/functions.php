@@ -57,6 +57,11 @@ function formatLotTimer($endTime, bool $viewSec = false)
 {
     $endTime = is_int($endTime) ?: strtotime($endTime);
     $time = $endTime - time();
+
+    if ($time < 0) {
+        return '00:00';
+    }
+
     $format = '%02d:%02d';
     !$viewSec ?: $format .= ':%02d';
 
@@ -203,11 +208,12 @@ function addLot(array $lot, array $photo)
             $sql = 'INSERT INTO lot
                       (add_user_id, category_id, name, description, img, price, price_step, add_time, end_time)
                     VALUES 
-                      (1, ?, ?, ?, ?, ?, ?, NOW(), ?)';
+                      (?, ?, ?, ?, ?, ?, ?, NOW(), ?)';
 
             $parameterList = [
                 'sql' => $sql,
                 'data' => [
+                    $_SESSION['user']['id'],
                     $lot['category'],
                     $lot['name'],
                     $lot['message'],
@@ -258,7 +264,7 @@ function isDate($var)
 
 function isFutureDate($var)
 {
-    return strtotime($var) > time();
+    return strtotime($var) >= strtotime("+1 day");
 }
 
 function isEmail($var)
@@ -284,7 +290,7 @@ function checkFormAddLot(array $lot)
 
     if (isDate($lot['date'])) {
         if (!isFutureDate($lot['date'])) {
-            $errors['date'] = 'Дата не может быть в прошлом';
+            $errors['date'] = 'Аукцион должен длится не менее одного дня';
         }
     } else {
         $errors['date'] = 'Выберите дату';
@@ -304,10 +310,10 @@ function checkImage(array $img, string $key)
         $fileName = $img['tmp_name'];
         $fileType = finfo_file($fileInfo, $fileName);
 
-        $fileFormat = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        $fileFormat = ['image/jpeg', 'image/png'];
 
         if (!in_array($fileType, $fileFormat)) {
-            $error[$key] = 'Выберите фотографию формата JPEG, JPG, PNG или WebP';
+            $error[$key] = 'Выберите фотографию формата JPEG, JPG или PNG';
         }
     }
 
@@ -381,7 +387,8 @@ function getUserByEmail(string $email)
     return processQuery($parameterList);
 }
 
-function checkFormLoginUser(array $user) {
+function checkFormLoginUser(array $user)
+{
     $errors = formRequiredFields($user, ['email', 'password']);
 
     if (empty($errors['email'])) {
@@ -393,35 +400,37 @@ function checkFormLoginUser(array $user) {
     return $errors;
 }
 
-function passwordReHash(array $queryUser, string $password)
+function passwordUpdate(int $userId, string $password)
 {
-    $options = [
-        'cost' => 10
+    $newHash = password_hash($password, PASSWORD_DEFAULT);
+
+    $sql = 'UPDATE user SET password_hash = ? WHERE id = ?';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [
+            $newHash,
+            $userId
+        ],
+        'limit' => 1
     ];
 
-    if (password_needs_rehash($queryUser['password_hash'], PASSWORD_BCRYPT, $options)) {
-        $newHash = password_hash($password, PASSWORD_BCRYPT, $options);
+    processQuery($parameterList);
 
-        $sql = 'UPDATE user SET password_hash = ? WHERE id = ?';
+    return $newHash;
+}
 
-        $parameterList = [
-            'sql' => $sql,
-            'data' => [
-                $newHash,
-                $queryUser['id']
-            ],
-            'limit' => 1
-        ];
-
-        processQuery($parameterList);
-
-        return $newHash;
+function passwordReHash(array $queryUser, string $password)
+{
+    if (password_needs_rehash($queryUser['password_hash'], PASSWORD_DEFAULT)) {
+        return passwordUpdate($queryUser['id'], $password);
     }
 
     return $queryUser['password_hash'];
 }
 
-function loginUser(array $user) {
+function loginUser(array $user)
+{
     $errors = checkFormLoginUser($user);
 
     if (empty($errors)) {
@@ -441,9 +450,73 @@ function loginUser(array $user) {
     return [false, $errors];
 }
 
-function isAuthorized() {
-    if (empty($_SESSION['user'])) {
+function isAuthorized()
+{
+    if (!empty($_SESSION['user'])) {
         return true;
+    }
+
+    return false;
+}
+
+function isBet($var)
+{
+    return filter_var($var, FILTER_VALIDATE_INT);
+}
+
+function formAddBet(array $bet, $minPrice)
+{
+    $errors = formRequiredFields($bet, ['cost']);
+
+    if (empty($errors)) {
+        if (isBet($bet['cost'])) {
+            if ($bet['cost'] < $minPrice) {
+                $errors['cost'] = 'Ставка не может быть ниже минимальной';
+            }
+        } else {
+            $errors['cost'] = 'Неверно указана цена';
+        }
+    }
+
+    return $errors;
+}
+
+function addBet(int $lotId, array $bet, int $minPrice)
+{
+    $errors = formAddBet($bet, $minPrice);
+
+    if (empty($errors)) {
+        $sql = 'INSERT INTO bet
+                  (user_id, lot_id, add_time, price)
+                VALUES
+                  (?, ?, NOW(), ?)';
+
+        $parameterList = [
+            'sql' => $sql,
+            'data' => [
+                $_SESSION['user']['id'],
+                $lotId,
+                $bet['cost']
+            ],
+            'limit' => null
+        ];
+
+        processQuery($parameterList);
+
+        return true;
+    }
+
+    return $errors;
+}
+
+function viewBetFrom(array $lot, $lastBetUserId)
+{
+    if (isAuthorized()) {
+        if (strtotime($lot['end_time']) > time() && $_SESSION['user']['id'] != $lot['add_user_id']) {
+            if ($lastBetUserId != $_SESSION['user']['id']) {
+                return true;
+            }
+        }
     }
 
     return false;
