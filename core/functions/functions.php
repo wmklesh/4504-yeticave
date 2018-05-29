@@ -233,7 +233,7 @@ function addLot(array $lot, array $photo)
             $parameterList = [
                 'sql' => $sql,
                 'data' => [
-                    $_SESSION['user']['id'],
+                    getCurrentUser()['id'],
                     $lot['category'],
                     $lot['name'],
                     $lot['message'],
@@ -474,7 +474,7 @@ function loginUser(array $user)
 
 function isAuthorized()
 {
-    if (!empty($_SESSION['user'])) {
+    if (!empty(getCurrentUser())) {
         return true;
     }
 
@@ -516,7 +516,7 @@ function addBet(int $lotId, array $bet, int $minPrice)
         $parameterList = [
             'sql' => $sql,
             'data' => [
-                $_SESSION['user']['id'],
+                getCurrentUser()['id'],
                 $lotId,
                 $bet['cost']
             ],
@@ -534,12 +534,17 @@ function addBet(int $lotId, array $bet, int $minPrice)
 function viewBetFrom(array $lot, $lastBetUserId)
 {
     if (isAuthorized()) {
-        if (strtotime($lot['end_time']) > time() && $_SESSION['user']['id'] != $lot['add_user_id']) {
-            if ($lastBetUserId != $_SESSION['user']['id']) {
+        if (strtotime($lot['end_time']) > time() && getCurrentUser()['id'] != $lot['add_user_id']) {
+            if ($lastBetUserId != getCurrentUser()['id']) {
                 return true;
             }
         }
     }
 
     return false;
+}
+
+function getCurrentUser()
+{
+    return $_SESSION['user'];
 }

@@ -28,10 +28,10 @@ foreach ($categoryList as $category) {
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,
     'catListContent' => $catListContent,
-    'isAuth' => empty($_SESSION['user']) ? false : true,
-    'userName' => $_SESSION['user']['name'] ?? null,
-    'userAvatar' => $_SESSION['user']['avatar'] ?? null,
-    'title' => 'Yeticave - Главная страница'
+    'isAuth' => empty(getCurrentUser()) ? false : true,
+    'userName' => getCurrentUser()['name'] ?? null,
+    'userAvatar' => getCurrentUser()['avatar'] ?? null,
+    'title' => 'Yeticave - Результаты поиска «' . $search . '»'
 ]);
 
 echo $layoutContent;
