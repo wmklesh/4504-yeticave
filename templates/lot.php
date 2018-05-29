@@ -51,8 +51,10 @@
                             <input id="cost" type="number" name="bet[cost]" placeholder="<?= ($price + $priceStep) ?>">
                         </p>
                         <button type="submit" class="button">Сделать ставку</button>
-                        <span class="form__error"><?= $errors['cost'] ?></span>
                     </form>
+                    <div class="form__item form__item--small <?= !isset($errors['cost']) ?: 'form__item--invalid' ?>">
+                        <span class="form__error form__item--invalid"><?= $errors['cost'] ?></span>
+                    </div>
                 <?php endif; ?>
             </div>
             <div class="history">

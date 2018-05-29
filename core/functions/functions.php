@@ -53,6 +53,13 @@ function includeTemplate(string $tpl, array $data)
     return '';
 }
 
+function finishTimer($endTime)
+{
+    $endTime = is_int($endTime) ?: strtotime($endTime);
+
+    return $endTime - time() < 0 ? true : false;
+}
+
 function formatLotTimer($endTime, bool $viewSec = false)
 {
     $endTime = is_int($endTime) ?: strtotime($endTime);
@@ -99,13 +106,7 @@ function processQuery(array $parameterList, $connection = null)
         return $res;
     }
 
-    if (mysqli_num_rows($res) > 1) {
-        $result = mysqli_fetch_all($res, MYSQLI_ASSOC);
-    } else {
-        $result = mysqli_fetch_array($res, MYSQLI_ASSOC);
-    }
-
-    return $result;
+    return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
 function addLimit(array &$parameterList)
@@ -129,6 +130,23 @@ function getLotList(int $limit = null, $connection = null)
     $parameterList = [
         'sql' => $sql,
         'data' => [],
+        'limit' => $limit
+    ];
+
+    return processQuery($parameterList, $connection);
+}
+
+function getSearchLotList(string $search, int $limit = null, $connection = null)
+{
+    $sql = 'SELECT l.*, c.name categoryName
+            FROM lot l
+              JOIN category c ON c.id = l.category_id
+            WHERE MATCH(l.name, l.description) AGAINST(?)
+            ORDER BY l.add_time DESC';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [$search],
         'limit' => $limit
     ];
 
@@ -161,7 +179,9 @@ function getLot(int $lotId, $connection = null)
         'limit' => 1
     ];
 
-    return processQuery($parametersList, $connection);
+    $result = processQuery($parametersList, $connection);
+
+    return reset($result);
 }
 
 function getBetList(int $lotId, int $limit = null, $connection = null)
@@ -384,7 +404,9 @@ function getUserByEmail(string $email)
         'limit' => 1
     ];
 
-    return processQuery($parameterList);
+    $result = processQuery($parameterList);
+
+    return reset($result);
 }
 
 function checkFormLoginUser(array $user)

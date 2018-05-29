@@ -48,6 +48,7 @@ $pageContent = includeTemplate('lot', [
     'endTime' => $lot['end_time'],
     'betCount' => count($betList),
     'viewFormBet' => viewBetFrom($lot, $betList[0]['user_id'] ?? null),
+    'errors' => $errors ?? [],
     'betListContent' => $betListContent
 ]);
 
