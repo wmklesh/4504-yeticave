@@ -10,7 +10,7 @@
                 <span class="lot__amount">Стартовая цена</span>
                 <span class="lot__cost"><?= formatPrice($price) ?><b class="rub">р</b></span>
             </div>
-            <div class="lot__timer timer">
+            <div class="lot__timer timer <?= finishTimer($end_time) ? 'timer--finishing' : null?>">
                 <?= formatLotTimer($end_time) ?>
             </div>
         </div>

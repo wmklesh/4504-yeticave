@@ -34,6 +34,8 @@ VALUES
   (2, 1, '2018-05-07 11:23:56', 11499),
   (4, 1, '2018-05-08 20:57:11', 11999);
 
+CREATE FULLTEXT INDEX lot_ft_search ON lot(name, description);
+
 /* получить все категории */
 SELECT * FROM category;
 
