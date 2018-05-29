@@ -1,0 +1,10 @@
+{
+    "name": "swiftmailer/swiftmailer",
+    "authors": [
+        {
+            "name": "Alexander Zimin",
+            "email": "klesh2@mail.ru"
+        }
+    ],
+    "require": {}
+}
