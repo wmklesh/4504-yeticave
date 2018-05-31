@@ -546,7 +546,7 @@ function viewBetFrom(array $lot, $lastBetUserId)
 
 function getCurrentUser()
 {
-    return $_SESSION['user'];
+    return getSession()['user'];
 }
 
 function getCompletedLot()
@@ -582,13 +582,13 @@ function updateWinUserLot($lot)
     processQuery($parameterList);
 
     if ($lot['user_id']) {
-        toInformByWin($lot);
+        informWinner($lot);
     }
 
     return $lot['user_id'] ? true : false;
 }
 
-function toInformByWin($lot)
+function informWinner($lot)
 {
     $mailContent = includeTemplate('email', [
         'userName' => $lot['user_name'],
@@ -601,11 +601,15 @@ function toInformByWin($lot)
 
 function getSmtp()
 {
-    $config = getConfig();
+    static $transport = null;
 
-    $transport = (new Swift_SmtpTransport($config['smtp_server'], $config['smtp_port']))
-        ->setUsername($config['smtp_name'])
-        ->setPassword($config['smtp_pass']);
+    if ($transport === null) {
+        $config = getConfig();
+
+        $transport = (new Swift_SmtpTransport($config['smtp_server'], $config['smtp_port']))
+            ->setUsername($config['smtp_name'])
+            ->setPassword($config['smtp_pass']);
+    }
 
     return $transport;
 }
@@ -622,3 +626,24 @@ function sendEmail($title, $to, $content, $from = ['keks@phpdemo.ru' => 'Keks'])
     return $mailer->send($message);
 }
 
+function getSession()
+{
+    static $session = null;
+
+    if ($session === null) {
+        $session = $_SESSION;
+    }
+
+    return $session;
+}
+
+function getServer()
+{
+    static $server = null;
+
+    if ($server === null) {
+        $server = $_SERVER;
+    }
+
+    return $server;
+}
