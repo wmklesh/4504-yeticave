@@ -1,6 +1,7 @@
 <?php
 
 require __DIR__ . '/core/bootstrap.php';
+require __DIR__ . '/getwinner.php';
 
 $lotList = getLotList(9);
 $lotListContent = '';

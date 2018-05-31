@@ -548,3 +548,77 @@ function getCurrentUser()
 {
     return $_SESSION['user'];
 }
+
+function getCompletedLot()
+{
+    $sql = 'SELECT l.id, l.name, IFNULL(b.user_id, 0) user_id, u.name user_name, u.email
+        FROM lot l
+          LEFT JOIN bet b ON b.id = (SELECT max(id) FROM bet WHERE lot_id = l.id)
+          LEFT JOIN user u ON u.id = b.user_id
+        WHERE l.win_user_id IS NULL AND l.end_time <= NOW()';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [],
+        'limit' => null
+    ];
+
+    return processQuery($parameterList);
+}
+
+function updateWinUserLot($lot)
+{
+    $sql = 'UPDATE lot SET win_user_id = ? WHERE id = ?';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [
+            $lot['user_id'],
+            $lot['id']
+        ],
+        'limit' => 1
+    ];
+
+    processQuery($parameterList);
+
+    if ($lot['user_id']) {
+        toInformByWin($lot);
+    }
+
+    return $lot['user_id'] ? true : false;
+}
+
+function toInformByWin($lot)
+{
+    $mailContent = includeTemplate('email', [
+        'userName' => $lot['user_name'],
+        'lotId' => $lot['id'],
+        'lotName' => $lot['name']
+    ]);
+
+    return sendEmail('Ваша ставка победила', [$lot['email'] => $lot['user_name']], $mailContent);
+}
+
+function getSmtp()
+{
+    $config = getConfig();
+
+    $transport = (new Swift_SmtpTransport($config['smtp_server'], $config['smtp_port']))
+        ->setUsername($config['smtp_name'])
+        ->setPassword($config['smtp_pass']);
+
+    return $transport;
+}
+
+function sendEmail($title, $to, $content, $from = ['keks@phpdemo.ru' => 'Keks'])
+{
+    $mailer = new Swift_Mailer(getSmtp());
+
+    $message = (new Swift_Message($title))
+        ->setFrom($from)
+        ->setTo($to)
+        ->setBody($content, 'text/html');
+
+    return $mailer->send($message);
+}
+
