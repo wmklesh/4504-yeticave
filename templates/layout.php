@@ -27,7 +27,7 @@
                     <img src="<?= $userAvatar ?>" width="40" height="40" alt="Пользователь">
                 </div>
                 <div class="user-menu__logged">
-                    <p><?= $userName ?></p>
+                    <a href="bet.php"><p><?= $userName ?></p></a>
                     <a href="logout.php">Выход</a>
                 </div>
             <?php else: ?>

@@ -43,8 +43,8 @@ $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,
     'catListContent' => $catListContent,
     'isAuth' => empty($_SESSION['user']) ? false : true,
-    'userName' => $_SESSION['user']['name'] ?? null,
-    'userAvatar' => $_SESSION['user']['avatar'] ?? null,
+    'userName' => $_SESSION['user']['name'],
+    'userAvatar' => $_SESSION['user']['avatar'],
     'title' => 'Yeticave - Добавление лота'
 ]);
 
