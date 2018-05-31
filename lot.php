@@ -36,7 +36,17 @@ foreach ($betList as $bet) {
     ]);
 }
 
+$categoryList = getCatList();
+$catListContent = '';
+foreach ($categoryList as $category) {
+    $catListContent .= includeTemplate('nav-item', [
+        'id' => $category['id'],
+        'name' => $category['name']
+    ]);
+}
+
 $pageContent = includeTemplate('lot', [
+    'catListContent' => $catListContent,
     'isAuth' => empty(getCurrentUser()) ? false : true,
     'lotId' => $lot['id'],
     'name' => $lot['name'],
@@ -51,12 +61,6 @@ $pageContent = includeTemplate('lot', [
     'errors' => $errors ?? [],
     'betListContent' => $betListContent
 ]);
-
-$categoryList = getCatList();
-$catListContent = '';
-foreach ($categoryList as $category) {
-    $catListContent .= includeTemplate('nav-item', ['name' => $category['name']]);
-}
 
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,

@@ -15,17 +15,21 @@ if ($_POST) {
     }
 }
 
+$categoryList = getCatList();
+$catListContent = '';
+foreach ($categoryList as $category) {
+    $catListContent .= includeTemplate('nav-item', [
+        'id' => $category['id'],
+        'name' => $category['name']
+    ]);
+}
+
 $pageContent = includeTemplate('login', [
+    'catListContent' => $catListContent,
     'email' => $user['email'] ?? '',
     'password' => $user['password'] ?? '',
     'errors' => $errors ?? []
 ]);
-
-$categoryList = getCatList();
-$catListContent = '';
-foreach ($categoryList as $category) {
-    $catListContent .= includeTemplate('nav-item', ['name' => $category['name']]);
-}
 
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,

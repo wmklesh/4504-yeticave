@@ -19,7 +19,16 @@ if ($_POST) {
 }
 
 $categoryList = getCatList();
+$catListContent = '';
+foreach ($categoryList as $category) {
+    $catListContent .= includeTemplate('nav-item', [
+        'id' => $category['id'],
+        'name' => $category['name']
+    ]);
+}
+
 $pageContent = includeTemplate('add', [
+    'catListContent' => $catListContent,
     'name' => $lot['name'] ?? '',
     'category' => $lot['category'] ?? '',
     'message' => $lot['message'] ?? '',
@@ -28,13 +37,7 @@ $pageContent = includeTemplate('add', [
     'date' => $lot['date'] ?? '',
     'errors' => $errors ?? [],
     'categoryList' => $categoryList
-
 ]);
-
-$catListContent = '';
-foreach ($categoryList as $category) {
-    $catListContent .= includeTemplate('nav-item', ['name' => $category['name']]);
-}
 
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,

@@ -111,32 +111,46 @@ function processQuery(array $parameterList, $connection = null)
 
 function addLimit(array &$parameterList)
 {
+
     if ((int)$parameterList['limit']) {
         $parameterList['sql'] .= ' LIMIT ?';
         $parameterList['data'][] = (int)$parameterList['limit'];
     }
 
+    if (!empty($parameterList['offset'])) {
+        if ((int)$parameterList['offset']) {
+            $parameterList['sql'] .= ' OFFSET ?';
+            $parameterList['data'][] = (int)$parameterList['offset'];
+        }
+    }
+
     return;
 }
 
-function getLotList(int $limit = null, $connection = null)
+function getLotList(int $limit = null, int $offset = null, int $category = null, $connection = null)
 {
     $sql = 'SELECT l.*, c.name categoryName
             FROM lot l
               JOIN category c ON c.id = l.category_id
-            WHERE l.end_time > NOW()
-            ORDER BY l.add_time DESC';
+            WHERE l.end_time > NOW()';
+    if ($category) {
+        $sql .= ' AND category_id = ? ';
+    }
+    $sql .= 'ORDER BY l.add_time DESC';
 
     $parameterList = [
         'sql' => $sql,
-        'data' => [],
-        'limit' => $limit
+        'data' => [
+            $category
+        ],
+        'limit' => $limit,
+        'offset' => $offset
     ];
 
     return processQuery($parameterList, $connection);
 }
 
-function getSearchLotList(string $search, int $limit = null, $connection = null)
+function getSearchLotList(string $search, int $limit = null, int $offset = null, $connection = null)
 {
     $sql = 'SELECT l.*, c.name categoryName
             FROM lot l
@@ -147,7 +161,8 @@ function getSearchLotList(string $search, int $limit = null, $connection = null)
     $parameterList = [
         'sql' => $sql,
         'data' => [$search],
-        'limit' => $limit
+        'limit' => $limit,
+        'offset' => $offset
     ];
 
     return processQuery($parameterList, $connection);
@@ -155,7 +170,7 @@ function getSearchLotList(string $search, int $limit = null, $connection = null)
 
 function getCatList(int $limit = null, $connection = null)
 {
-    $sql = 'SELECT * FROM category';
+    $sql = 'SELECT * FROM category ORDER BY id';
 
     $parameterList = [
         'sql' => $sql,
@@ -218,7 +233,7 @@ function saveImage(array $image, string $dir)
     }
 }
 
-function addLot(array $lot, array $photo)
+function addLot(array $lot, array $photo, $connection = null)
 {
     $errors = array_merge(checkFormAddLot($lot), checkImage($photo, 'photo'));
 
@@ -245,7 +260,7 @@ function addLot(array $lot, array $photo)
                 'limit' => null
             ];
 
-            processQuery($parameterList);
+            processQuery($parameterList, $connection);
 
             return mysqli_insert_id(getConnection());
         }
@@ -292,11 +307,27 @@ function isEmail($var)
     return filter_var($var, FILTER_VALIDATE_EMAIL);
 }
 
+
+function getCat(int $id)
+{
+    $sql = 'SELECT * FROM category WHERE id = ?';
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [$id],
+        'limit' => 1
+    ];
+
+    $result = processQuery($parameterList);
+
+    return reset($result);
+}
+
 function checkFormAddLot(array $lot)
 {
     $errors = formRequiredFields($lot, ['name', 'message', 'rate', 'step']);
 
-    if (!getLot($lot['category'])) {
+    if (!getCat($lot['category'])) {
         $errors['category'] = 'Выберите категорию';
     }
 
@@ -355,7 +386,7 @@ function checkFromAddUser(array $user)
     return $errors;
 }
 
-function addUser(array $user, array $avatar)
+function addUser(array $user, array $avatar, $connection = null)
 {
     $errors = array_merge(checkFromAddUser($user), checkImage($avatar, 'avatar'));
 
@@ -379,7 +410,7 @@ function addUser(array $user, array $avatar)
                 'limit' => null
             ];
 
-            processQuery($parameterList);
+            processQuery($parameterList, $connection);
 
             return true;
         }
@@ -388,7 +419,7 @@ function addUser(array $user, array $avatar)
     }
 }
 
-function getUserByEmail(string $email)
+function getUserByEmail(string $email, $connection = null)
 {
     if (empty($email)) {
         return false;
@@ -404,7 +435,7 @@ function getUserByEmail(string $email)
         'limit' => 1
     ];
 
-    $result = processQuery($parameterList);
+    $result = processQuery($parameterList, $connection);
 
     return reset($result);
 }
@@ -422,7 +453,7 @@ function checkFormLoginUser(array $user)
     return $errors;
 }
 
-function passwordUpdate(int $userId, string $password)
+function passwordUpdate(int $userId, string $password, $connection = null)
 {
     $newHash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -437,7 +468,7 @@ function passwordUpdate(int $userId, string $password)
         'limit' => 1
     ];
 
-    processQuery($parameterList);
+    processQuery($parameterList, $connection);
 
     return $newHash;
 }
@@ -503,7 +534,7 @@ function formAddBet(array $bet, $minPrice)
     return $errors;
 }
 
-function addBet(int $lotId, array $bet, int $minPrice)
+function addBet(int $lotId, array $bet, int $minPrice, $connection = null)
 {
     $errors = formAddBet($bet, $minPrice);
 
@@ -523,7 +554,7 @@ function addBet(int $lotId, array $bet, int $minPrice)
             'limit' => null
         ];
 
-        processQuery($parameterList);
+        processQuery($parameterList, $connection);
 
         return true;
     }
@@ -546,7 +577,7 @@ function viewBetFrom(array $lot, $lastBetUserId)
 
 function getCurrentUser()
 {
-    return getSession()['user'];
+    return getSession()['user'] ?? false;
 }
 
 function getCompletedLot()
@@ -566,7 +597,7 @@ function getCompletedLot()
     return processQuery($parameterList);
 }
 
-function updateWinUserLot($lot)
+function updateWinUserLot($lot, $connection = null)
 {
     $sql = 'UPDATE lot SET win_user_id = ? WHERE id = ?';
 
@@ -579,7 +610,7 @@ function updateWinUserLot($lot)
         'limit' => 1
     ];
 
-    processQuery($parameterList);
+    processQuery($parameterList, $connection);
 
     if ($lot['user_id']) {
         informWinner($lot);
@@ -646,4 +677,43 @@ function getServer()
     }
 
     return $server;
+}
+
+function getCountLot(bool $active = false, int $category = null, $connection = null)
+{
+    $sql = 'SELECT COUNT(*) count FROM lot';
+    if ($category || $active) {
+        $sql .= ' WHERE';
+    }
+    if ($category) {
+        $sql .= ' category_id = ?';
+    }
+    if ($active) {
+        if ($category) {
+            $sql .= ' AND';
+        }
+        $sql .= ' end_time > NOW()';
+    }
+
+    $parameterList = [
+        'sql' => $sql,
+        'data' => [],
+        'limit' => null
+    ];
+
+    if ($category) {
+        $parameterList['data'][] = $category;
+    }
+
+    $result = processQuery($parameterList, $connection);
+
+    return reset($result)['count'];
+}
+
+function pagination(int $curPage = 1, int $pageItem, int $itemsCount)
+{
+    $pagesCount = ceil($itemsCount / $pageItem);
+    $offset = ($curPage - 1) * $pageItem;
+
+    return [$pagesCount, $offset];
 }
