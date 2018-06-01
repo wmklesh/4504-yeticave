@@ -652,12 +652,12 @@ function checkFormLoginUser(array $user)
 }
 
 /**
- * Обновление кэша пароля у пользователя
+ * Обновление хэша пароля у пользователя
  * @param int $userId Id пользователя
  * @param string $password Пароль пользователя
  * @param null $connection Подключение к БД
  *
- * @return bool|string Новый кэш пароля
+ * @return bool|string Новый хэш пароля
  */
 function passwordUpdate(int $userId, string $password, $connection = null)
 {
@@ -680,11 +680,11 @@ function passwordUpdate(int $userId, string $password, $connection = null)
 }
 
 /**
- * Проверка нужно ли обновить кэш пароля у пользователя
+ * Проверка нужно ли обновить хэш пароля у пользователя
  * @param array $queryUser Данные пользователя
  * @param string $password Пароль полльзователя
  *
- * @return bool|mixed|string Кэш пароля
+ * @return bool|mixed|string Хэш пароля
  */
 function passwordReHash(array $queryUser, string $password)
 {
@@ -979,7 +979,7 @@ function getServer()
 }
 
 /**
- * Получаем количество лотов с возможностью сортировки по категориям
+ * Получаем количество лотов с возможностью фильтрации по категориям
  * @param bool $active Только активные лоты
  * @param int|null $category Категория
  * @param null $connection Подключение к БД
@@ -1055,4 +1055,45 @@ function getUserBetList($connection = null)
     ];
 
     return processQuery($parameterList, $connection);
+}
+
+/**
+ * Отстановка выполнения сценария с выводом кода ошибки 404
+ */
+function stopScript()
+{
+    http_response_code(404);
+    exit;
+
+    return;
+}
+
+/**
+ * Получение всех данных из массива $_GET
+ * @return array $_GET
+ */
+function getQuery()
+{
+    static $get = null;
+
+    if ($get == null) {
+        $get = $_GET;
+    }
+
+    return $get;
+}
+
+/**
+ * Получение всех данных из массива $_POST
+ * @return array $_POST
+ */
+function postQuery()
+{
+    static $post = null;
+
+    if ($post == null) {
+        $post = $_POST;
+    }
+
+    return $post;
 }

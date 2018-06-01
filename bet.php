@@ -3,8 +3,7 @@
 require __DIR__ . '/core/bootstrap.php';
 
 if (isAuthorized() === false) {
-    http_response_code(404);
-    exit;
+    stopScript();
 }
 
 $categoryList = getCatList();

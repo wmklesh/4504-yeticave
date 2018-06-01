@@ -2,7 +2,7 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
-$search = trim($_GET['search']) ?? null;
+$search = trim(getQuery()['search']) ?? null;
 if (empty($search)) {
     header('Location: index.php');
     exit;

@@ -3,12 +3,11 @@
 require __DIR__ . '/core/bootstrap.php';
 
 if (isAuthorized() === false) {
-    http_response_code(404);
-    exit;
+    stopScript();
 }
 
 if ($_POST) {
-    $lot = $_POST['lot'];
+    $lot = postQuery()['lot'];
     $resultAddLot = addLot($lot, $_FILES['photo']);
 
     if (is_numeric($resultAddLot)) {

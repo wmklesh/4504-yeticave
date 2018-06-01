@@ -3,23 +3,24 @@
 require __DIR__ . '/core/bootstrap.php';
 require __DIR__ . '/getwinner.php';
 
-$SelectCategory = false;
+$selectCategory = false;
 if (!empty($_GET['category'])) {
-    $SelectCategory = getCat($_GET['category']);
+    $selectCategory = getCat(getQuery()['category']);
 
-    if ($SelectCategory == false) {
-        http_response_code(404);
-        exit;
+    if ($selectCategory == false) {
+        stopScript();
     }
 }
 
 $pageItem = 9;
-$curPage = $_GET['page'] ?? 1;
-list($pagesCount, $offset) = pagination($curPage, $pageItem, getCountLot(
-        true, $SelectCategory['id'] ?? null)
+$curPage = getQuery()['page'] ?? 1;
+list($pagesCount, $offset) = pagination(
+    $curPage,
+    $pageItem,
+    getCountLot(true, $selectCategory['id'] ?? null)
 );
 
-$lotList = getLotList($pageItem, $offset, $SelectCategory['id'] ?? null);
+$lotList = getLotList($pageItem, $offset, $selectCategory['id'] ?? null);
 $lotListContent = '';
 foreach ($lotList as $lot) {
     $lotListContent .= includeTemplate('lot-item', $lot);
@@ -31,7 +32,7 @@ if ($pagesCount > 1) {
         'pages' => range(1, $pagesCount),
         'pageCount' => $pagesCount,
         'curPage' => $curPage,
-        'link' => $SelectCategory['id'] ? '?category=' . $SelectCategory['id'] . '&' : '?'
+        'link' => $selectCategory['id'] ? '?category=' . $selectCategory['id'] . '&' : '?'
     ]);
 }
 
@@ -55,7 +56,7 @@ $layoutContent = includeTemplate('layout', [
     'isAuth' => empty(getCurrentUser()) ? false : true,
     'userName' => getCurrentUser()['name'] ?? null,
     'userAvatar' => getCurrentUser()['avatar'] ?? null,
-    'title' => 'Yeticave - ' . ($SelectCategory ? 'Все лоты в категории ' . $SelectCategory['name'] : 'Главная страница')
+    'title' => 'Yeticave - ' . ($selectCategory ? 'Все лоты в категории ' . $selectCategory['name'] : 'Главная страница')
 ]);
 
 echo $layoutContent;

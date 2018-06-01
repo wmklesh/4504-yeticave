@@ -3,7 +3,7 @@
 require __DIR__ . '/core/bootstrap.php';
 
 if ($_POST) {
-    $user = $_POST['user'];
+    $user = postQuery()['user'];
     list($isLogin, $resultAutUser) = loginUser($user);
 
     if ($isLogin === true) {

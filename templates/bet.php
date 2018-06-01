@@ -6,6 +6,6 @@
 <section class="rates container">
     <h2>Мои ставки</h2>
     <table class="rates__list">
-        <?= $_betListContent ?>
+        <?= !empty($_betListContent) ? $_betListContent : 'У Вас нет ставок' ?>
     </table>
 </section>
