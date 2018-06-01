@@ -3,7 +3,7 @@
 require __DIR__ . '/core/bootstrap.php';
 
 if ($_POST) {
-    $user = $_POST['user'];
+    $user = postQuery()['user'];
     $resultAddUser = addUser($user, $_FILES['avatar']);
 
     if ($resultAddUser === true) {
@@ -13,19 +13,23 @@ if ($_POST) {
     }
 }
 
+$categoryList = getCatList();
+$catListContent = '';
+foreach ($categoryList as $category) {
+    $catListContent .= includeTemplate('nav-item', [
+        'id' => $category['id'],
+        'name' => $category['name']
+    ]);
+}
+
 $pageContent = includeTemplate('registration', [
+    'catListContent' => $catListContent,
     'email' => $user['email'] ?? '',
     'password' => $user['password'] ?? '',
     'name' => $user['name'] ?? '',
     'message' => $user['message'] ?? '',
     'errors' => $errors ?? []
 ]);
-
-$categoryList = getCatList();
-$catListContent = '';
-foreach ($categoryList as $category) {
-    $catListContent .= includeTemplate('nav-item', ['name' => $category['name']]);
-}
 
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,

@@ -2,7 +2,7 @@
 
 require __DIR__ . '/core/bootstrap.php';
 
-$search = trim($_GET['search']) ?? null;
+$search = trim(getQuery()['search']) ?? null;
 if (empty($search)) {
     header('Location: index.php');
     exit;
@@ -14,16 +14,20 @@ foreach ($lotList as $lot) {
     $lotListContent .= includeTemplate('lot-item', $lot);
 }
 
-$pageContent = includeTemplate('search', [
-    'search' => $search,
-    'lotListContent' => $lotListContent
-]);
-
 $categoryList = getCatList();
 $catListContent = '';
 foreach ($categoryList as $category) {
-    $catListContent .= includeTemplate('nav-item', ['name' => $category['name']]);
+    $catListContent .= includeTemplate('nav-item', [
+        'id' => $category['id'],
+        'name' => $category['name']
+    ]);
 }
+
+$pageContent = includeTemplate('search', [
+    'catListContent' => $catListContent,
+    'search' => $search,
+    'lotListContent' => $lotListContent
+]);
 
 $layoutContent = includeTemplate('layout', [
     'content' => $pageContent,
